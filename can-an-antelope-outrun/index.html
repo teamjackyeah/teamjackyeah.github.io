@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Can an Antelope Outrun</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+/* Layout: a two-player tabletop phone game. The phone lies flat: top half (upside down) is the antelope's tap pad, bottom half is the chaser's, the globe (then space) sits in a strip between them. Single dark-navy look matching teamjackyeah. */
+:root{
+  --navy:#0b1f4a;
+  --deep:#06122c;
+  --ink:#f2f4f8;
+  --muted:#a9b7d6;
+  --ante:#f2b84a;
+  --chase:#ff5d5d;
+  --gold:#ffd23f;
+  --pixel:"Press Start 2P","Courier New",monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0}
+body{background:var(--deep);color:var(--ink);font-family:var(--pixel);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.game{height:100%;display:grid;grid-template-rows:1fr minmax(150px,26%) 1fr}
+.pad{position:relative;display:grid;place-items:center;touch-action:none;cursor:pointer;overflow:hidden;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.pad.top{background:#3a2a10;transform:rotate(180deg)}
+.pad.bot{background:#3a1416}
+.pad .inner{display:grid;justify-items:center;gap:10px;pointer-events:none;text-align:center}
+.pad canvas{width:min(168px,40vw);height:auto;aspect-ratio:6/5;image-rendering:pixelated}
+.pad .who{font-size:clamp(10px,3vw,14px)}
+.pad.top .who{color:var(--ante)}.pad.bot .who{color:var(--chase)}
+.pad .tap{font-size:clamp(20px,7vw,34px);text-shadow:3px 3px 0 #000}
+.speed{width:min(240px,70vw);height:12px;border:3px solid #000;background:#111}
+.speed i{display:block;height:100%;width:0;transition:width .1s}
+.pad.top .speed i{background:var(--ante)}.pad.bot .speed i{background:var(--chase)}
+.pad.flash{filter:brightness(1.35)}
+.mid{position:relative;background:var(--navy);border-block:4px solid #000;overflow:hidden}
+#world{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.banner{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:clamp(14px,5vw,26px);text-shadow:3px 3px 0 #000;pointer-events:none}
+
+.menu{position:fixed;inset:0;background:var(--navy);display:grid;place-items:center;z-index:5;overflow:auto;
+  padding:24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px))}
+.menu[hidden]{display:none}
+.card{width:min(420px,100%);display:grid;gap:18px;text-align:center}
+.card h1{margin:0;font-weight:400;font-size:clamp(16px,5vw,24px);line-height:1.6;text-wrap:balance}
+.card h1 span{color:var(--ante)}
+.picks{display:grid;gap:10px}
+.pick{font-family:var(--pixel);font-size:13px;display:grid;grid-template-columns:72px 1fr;align-items:center;gap:12px;text-align:left;
+  background:#122b63;color:var(--ink);border:3px solid #2c4a8f;padding:10px 12px;cursor:pointer}
+.pick canvas{width:72px;height:60px;image-rendering:pixelated}
+.pick[aria-pressed="true"]{border-color:var(--gold);background:#1a3a80}
+.pick:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.how{margin:0;font-size:9px;line-height:2;color:var(--muted)}
+.go{font-family:var(--pixel);font-size:14px;background:var(--gold);color:#1a1405;border:4px solid #000;box-shadow:5px 5px 0 #000;padding:14px;cursor:pointer}
+.go:disabled{opacity:.4}
+.go:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.back{color:var(--muted);font-size:9px;text-decoration:none}
+@media (prefers-reduced-motion: reduce){.speed i{transition:none}}
+</style>
+
+<div class="game" id="game">
+  <div class="pad top" id="padA" aria-label="Antelope tap pad"><div class="inner"><canvas id="sprA" width="24" height="20"></canvas><div class="who">ANTELOPE</div><div class="tap" id="tapA">TAP!</div><div class="speed"><i id="spdA"></i></div></div></div>
+  <div class="mid"><canvas id="world"></canvas><div class="banner" id="banner"></div></div>
+  <div class="pad bot" id="padB" aria-label="Chaser tap pad"><div class="inner"><canvas id="sprB" width="24" height="20"></canvas><div class="who" id="whoB">TIGER</div><div class="tap" id="tapB">TAP!</div><div class="speed"><i id="spdB"></i></div></div></div>
+</div>
+
+<div class="menu" id="menu">
+  <div class="card">
+    <h1>Can an <span>antelope</span> outrun a...</h1>
+    <div class="picks" id="picks"></div>
+    <p class="how">Lay the phone flat between two players. The antelope sits at the top, the chaser at the bottom. Tap your half as fast as you can. Escape the globe, then escape space.</p>
+    <button class="go" id="go" type="button">START</button>
+    <a class="back" href="../">← Back to teamjackyeah</a>
+  </div>
+</div>
+
+<script>
+(function(){
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// ---------- sprites (24 x 20 max) ----------
+const S={
+ antelope:{pal:{K:'#1a1208',B:'#c98a3a',b:'#f2c98a',W:'#fff6e6',H:'#3a2a18'},rows:[
+  "...H...H................","....H.H.................","....HH..................","...KBBK.................",
+  "..KBWBBK................","..KBBBBK................","...KBBKKKKKKKKKKK.......","....KBBBBBBBBBBBBK......",
+  "....KBbbbbbbbbbBBK......","....KBBBBBBBBBBBBK.K....","....KBBBBBBBBBBBKKBK....",".....KBK.KBK.KBK..KK....",
+  ".....KBK.KBK.KBK........",".....KHK.KHK.KHK........"]},
+ tiger:{pal:{K:'#140c06',O:'#f08a2a',o:'#ffd2a0',W:'#ffffff'},rows:[
+  "..KK..KK................",".KOOKKOOK...............",".KOKOOKOK...............","KOOWOOWOOK..............",
+  "KOOOOOOOOKKKKKKKKKKK....","KOoooooOOKOKOOKOOKOOK...",".KOoKKoOKOOKOOKOOKOOK.K.","..KooooKOOOOOOOOOOOOKOK.",
+  "...KKKKKooooooooooooKK..",".......KOOK.KOOK.KOOK...",".......KOOK.KOOK.KOOK...",".......KKK..KKK..KKK...."]},
+ dragon:{pal:{K:'#0c1a0c',G:'#3fae5a',g:'#8fe08a',R:'#e8504a',Y:'#ffd23f',W:'#ffffff'},rows:[
+  ".........K..K...........","........KgKKgK..........",".KK....KGGGGGK..........","KGGK..KGWKGGGGK.........",
+  "KGGGKKGGGGGGGGGK........",".KGGGGGGGGGGGGGGK.......","..KGgGGGGGGGGGGRRRY.....","...KGgGGgGGGGGK.........",
+  "....KGGGGGGGGGGGGK......","....KGGgggggggGGGGK.....","....KGGGGGGGGGGGGGGK.K..",".....KGGK.KGGK..KGGGKGK.",
+  ".....KGGK.KGGK...KKKGK..","......KK...KK.......K..."]},
+ bear:{pal:{K:'#1a1a1f',W:'#f4f6f8',w:'#c9d2dc'},rows:[
+  ".KK.KK..................","KWWKWWK.................","KWWWWWWK................","KWKWWWWWKKKKKKKKKK......",
+  "KWWWWWWWWWWWWWWWWWK.....","KKWWWWWWWWWWWWWWWWWK....",".KwwwwWWWWWWWWWWWWWK....","..KKKKwwwwwwwwwwwwwK....",
+  "......KWWK.KWWK.KWWK....","......KWWK.KWWK.KWWK....","......KKKK.KKKK.KKKK...."]},
+ shipA:{pal:{K:'#0a0a14',O:'#f2b84a',W:'#ffffff',B:'#7fd6ff',R:'#ff7a3d',Y:'#ffd23f'},rows:[
+  "......KKKK..........","....KKOOOOKK........","RYKKOOOOOOOOKK......","RYKOOOBBBBOOOWK.....",
+  "RYKKOOOOOOOOKK......","....KKOOOOKK........","......KKKK.........."]},
+ shipB:{pal:{K:'#0a0a14',O:'#ff5d5d',W:'#ffffff',B:'#7fd6ff',R:'#ff7a3d',Y:'#ffd23f'},rows:[
+  "......KKKK..........","....KKOOOOKK........","RYKKOOOOOOOOKK......","RYKOOOBBBBOOOWK.....",
+  "RYKKOOOOOOOOKK......","....KKOOOOKK........","......KKKK.........."]}
+};
+const NAMES={tiger:'TIGER',dragon:'DRAGON',bear:'POLAR BEAR'};
+function paint(cv,key,flip){const c=cv.getContext('2d');c.clearRect(0,0,cv.width,cv.height);const sp=S[key],h=sp.rows.length;sp.rows.forEach((r,j)=>{for(let i=0;i<r.length;i++){const col=sp.pal[r[i]];if(!col)continue;c.fillStyle=col;c.fillRect(flip?cv.width-1-i:i,j+Math.floor((cv.height-h)/2),1,1)}})}
+
+// ---------- menu ----------
+let chaser='tiger';
+const picks=document.getElementById('picks');
+['tiger','dragon','bear'].forEach(k=>{
+  const b=document.createElement('button');b.type='button';b.className='pick';b.setAttribute('aria-pressed',k===chaser);
+  const c=document.createElement('canvas');c.width=24;c.height=20;paint(c,k,true);
+  const t=document.createElement('span');t.textContent=NAMES[k];b.append(c,t);
+  b.addEventListener('click',()=>{chaser=k;picks.querySelectorAll('.pick').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  picks.appendChild(b);
+});
+paint(document.getElementById('sprA'),'antelope',false);
+
+// ---------- sound ----------
+let ac=null;function tone(f,d,type,v,delay){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime+(delay||0),o=ac.createOscillator(),g=ac.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v||.05,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+.05)}catch(e){}}
+function boom(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime,len=ac.sampleRate*1.2,buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);const s=ac.createBufferSource();s.buffer=buf;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(1200,t);f.frequency.exponentialRampToValueAtTime(80,t+1.2);const g=ac.createGain();g.gain.value=.5;s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t)}catch(e){}}
+
+// ---------- game state ----------
+const TRACK=100,HEAD=14,K=0.75,CHASE_K=0.82;
+let level=1,state='menu',posA=0,posB=0,tapsA=[],tapsB=[],spA=0,spB=0,t0=0,countdown=0,explode=null,endT=0;
+const banner=document.getElementById('banner');
+function rate(arr,now){while(arr.length&&now-arr[0]>1000)arr.shift();return arr.length}
+function hit(pad,arr,who){
+  pad.addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='race')return;arr.push(performance.now());tone(who==='A'?660:330,.04,'square',.03);pad.classList.add('flash');setTimeout(()=>pad.classList.remove('flash'),60)});
+}
+hit(document.getElementById('padA'),tapsA,'A');hit(document.getElementById('padB'),tapsB,'B');
+document.addEventListener('contextmenu',e=>e.preventDefault());
+
+function startLevel(n){
+  level=n;posA=HEAD;posB=0;tapsA.length=0;tapsB.length=0;spA=spB=0;explode=null;
+  paint(document.getElementById('sprA'),n===1?'antelope':'shipA',false);
+  paint(document.getElementById('sprB'),n===1?chaser:'shipB',false);
+  document.getElementById('whoB').textContent=n===1?NAMES[chaser]:NAMES[chaser]+' SHIP';
+  document.querySelector('.pad.top .who').textContent=n===1?'ANTELOPE':'ANTELOPE SHIP';
+  state='count';countdown=3.99;
+}
+document.getElementById('go').addEventListener('click',()=>{
+  document.getElementById('menu').hidden=true;tone(440,.1);
+  startLevel(1);
+});
+function endMenu(text){
+  setTimeout(()=>{document.getElementById('menu').hidden=false;document.querySelector('.card h1').innerHTML=text+'<br><br>Can an <span>antelope</span> outrun a...';document.getElementById('go').textContent='PLAY AGAIN'},2600);
+}
+
+// ---------- world view ----------
+const cv=document.getElementById('world'),ctx=cv.getContext('2d');
+let W=0,H=0,P=3;
+function size(){const r=cv.getBoundingClientRect();P=r.width<500?3:4;W=Math.ceil(r.width/P);H=Math.ceil(r.height/P);cv.width=W*P;cv.height=H*P}
+new ResizeObserver(size).observe(cv);size();
+const px=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x)*P,Math.round(y)*P,Math.ceil(w)*P,Math.ceil(h)*P)};
+function sprite(key,x,y,flip,scale){const sp=S[key];const s=scale||1;sp.rows.forEach((r,j)=>{for(let i=0;i<r.length;i++){const c=sp.pal[r[i]];if(!c)continue;px(x+(flip?r.length-1-i:i)*s,y+j*s,s,s,c)}})}
+
+// rough continents as lon/lat boxes
+const LAND=[[-165,-55,50,72],[-130,-60,25,50],[-110,-80,15,25],[-55,-20,60,82],[-80,-35,-20,10],[-75,-55,-55,-20],[-10,40,36,70],[-8,2,50,58],
+ [-17,50,5,35],[10,50,-35,5],[43,50,-25,-12],[40,180,45,75],[40,145,10,45],[95,120,-8,10],[130,145,32,44],[113,153,-38,-12],[166,178,-46,-35],[-180,180,-90,-70]];
+function isLand(lon,lat){lon=((lon+540)%360)-180;return LAND.some(b=>lon>=b[0]&&lon<=b[1]&&lat>=b[2]&&lat<=b[3])}
+const ROUTE_LAT=12,TILT=0.35;
+function globe(lon0){
+  const R=Math.floor(Math.min(H*0.46,W*0.3)),cx=Math.floor(W/2),cy=Math.floor(H/2);
+  const ct=Math.cos(TILT),st=Math.sin(TILT);
+  for(let y=-R;y<=R;y++)for(let x=-R;x<=R;x++){
+    const nx=x/R,ny=-y/R,d=nx*nx+ny*ny;if(d>1)continue;const nz=Math.sqrt(1-d);
+    // undo tilt
+    const y2=ny*ct+nz*st,z2=-ny*st+nz*ct;
+    const lat=Math.asin(y2)*180/Math.PI,lon=Math.atan2(nx,z2)*180/Math.PI+lon0;
+    const shade=0.55+0.45*nz;
+    let col=isLand(lon,lat)?(lat<-68?[235,240,245]:[70,160,80]):[40,90,180];
+    px(cx+x,cy+y,1,1,`rgb(${col[0]*shade|0},${col[1]*shade|0},${col[2]*shade|0})`);
+  }
+  return {R,cx,cy,ct,st};
+}
+function project(g,lon,lat,lon0){
+  const la=lat*Math.PI/180,lo=(lon-lon0)*Math.PI/180;
+  const x=Math.cos(la)*Math.sin(lo),y=Math.sin(la),z=Math.cos(la)*Math.cos(lo);
+  const y2=y*g.ct-z*g.st,z2=y*g.st+z*g.ct;
+  return {x:g.cx+x*g.R,y:g.cy-y2*g.R,vis:z2>0};
+}
+let stars=[];for(let i=0;i<140;i++)stars.push({x:Math.random(),y:Math.random(),s:Math.random()});
+
+function drawLevel1(t){
+  px(0,0,W,H,'#081633');
+  stars.forEach(s=>px(s.x*W,s.y*H,1,1,s.s>0.7?'#ffffff':'#4a5a8a'));
+  const lon0=(posA/TRACK)*360-180;
+  const g=globe(lon0);
+  // route dots
+  for(let i=0;i<=TRACK;i+=2){const p=project(g,(i/TRACK)*360-180,ROUTE_LAT,lon0);if(p.vis)px(p.x,p.y,1,1,i%10?'#ffe9a8':'#ffffff')}
+  const fin=project(g,180,ROUTE_LAT,lon0);if(fin.vis){px(fin.x-1,fin.y-4,1,5,'#fff');px(fin.x,fin.y-4,3,2,'#e8504a')}
+  const a=project(g,(posA/TRACK)*360-180,ROUTE_LAT,lon0),b=project(g,(posB/TRACK)*360-180,ROUTE_LAT,lon0);
+  if(b.vis)px(b.x-1,b.y-1,3,3,'#ff5d5d');
+  px(a.x-1,a.y-1,3,3,'#f2b84a');
+}
+function drawLevel2(t){
+  px(0,0,W,H,'#03040c');
+  const scroll=(posA*3)%W;
+  stars.forEach(s=>{const x=((s.x*W-scroll*(0.3+s.s))%W+W)%W;px(x,s.y*H,1+(s.s>0.85?1:0),1,s.s>0.6?'#fff':'#5a6aa0')});
+  // sun at the finish
+  const span=W-50,sx=10+span*(TRACK/TRACK)+18,sy=H/2;
+  for(let r=26;r>0;r-=2){ctx.globalAlpha=r===26?0.15:1;const c=r>18?'#ff8a2a':r>10?'#ffb84a':'#fff2a0';for(let y=-r;y<=r;y++){const w=Math.floor(Math.sqrt(r*r-y*y));px(sx-w,sy+y,w*2,1,c)}ctx.globalAlpha=1}
+  const ax=10+span*(posA/TRACK)-20,bx=10+span*(posB/TRACK)-20;
+  px(10,sy,span,1,'#1a2240');
+  sprite('shipB',bx,sy+3,false);sprite('shipA',ax,sy-10,false);
+}
+function drawExplosion(t){
+  if(!explode)return;const e=(t-explode.t)/1000;
+  for(let i=0;i<60;i++){const a=i*2.4,r=e*60*(0.4+(i%7)/7);const c=['#fff2a0','#ffb84a','#ff5d2a','#ffffff'][i%4];px(explode.x+Math.cos(a)*r,explode.y+Math.sin(a)*r*0.7,2,2,c)}
+  if(e<0.25){ctx.globalAlpha=1-e*4;px(0,0,W,H,'#ffffff');ctx.globalAlpha=1}
+}
+
+// ---------- loop ----------
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(state==='count'){
+    countdown-=dt;const n=Math.ceil(countdown-1);
+    banner.textContent=n>0?String(n):'GO!';
+    if(countdown<=0.6&&!loop.goPlayed){loop.goPlayed=1;tone(880,.2)}
+    if(countdown<=0){state='race';banner.textContent='';loop.goPlayed=0}
+  }
+  if(state==='race'){
+    const rA=rate(tapsA,now),rB=rate(tapsB,now);
+    spA+=(rA-spA)*Math.min(1,dt*6);spB+=(rB-spB)*Math.min(1,dt*6);
+    posA+=spA*K*dt;posB+=spB*CHASE_K*dt;
+    document.getElementById('spdA').style.width=Math.min(100,spA/12*100)+'%';
+    document.getElementById('spdB').style.width=Math.min(100,spB/12*100)+'%';
+    if(posB>=posA){
+      state='caught';boom();
+      const lon0=(posA/TRACK)*360-180;explode=level===1?{t:now,x:W/2,y:H/2}:{t:now,x:10+(W-50)*(posA/TRACK)-10,y:H/2};
+      banner.textContent='CAUGHT!';
+      endMenu(`The ${NAMES[chaser].toLowerCase()} wins!`);
+    }else if(posA>=TRACK){
+      if(level===1){state='between';banner.textContent='ESCAPED! TO SPACE...';tone(523,.12);tone(659,.12,'square',.05,.12);tone(784,.3,'square',.05,.24);setTimeout(()=>startLevel(2),2200)}
+      else{state='sun';boom();explode={t:now,x:W-22,y:H/2};banner.textContent='INTO THE SUN!';endMenu('The antelope escaped... straight into the sun. Everyone loses!')}
+    }
+  }
+  if(level===1)drawLevel1(now);else drawLevel2(now);
+  if(state==='race'||state==='count'){
+    // gap readout
+    const gap=Math.max(0,posA-posB);ctx.font=`${Math.max(8,P*2.4)}px "Press Start 2P", monospace`;ctx.fillStyle='#a9b7d6';ctx.textBaseline='bottom';
+    ctx.fillText(`LEAD ${gap.toFixed(0)}`,6,cv.height-6);const left=Math.max(0,TRACK-posA);const txt=`${level===1?'FINISH':'SUN'} ${left.toFixed(0)}`;
+    ctx.fillText(txt,cv.width-ctx.measureText(txt).width-6,cv.height-6);
+  }
+  drawExplosion(now);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>
