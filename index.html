@@ -6,31 +6,50 @@
 <title>teamjackyeah</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=Figtree:wght@400;600&display=swap">
 <style>
+  :root { --bg:#0b1f4a; --ink:#f2f4f8; --muted:#a9b7d6; --box:#122b63; --edge:#2c4a8f; --hi:#ffd23f; }
   html, body { height: 100%; margin: 0; }
   body {
-    background: #0b1f4a;
-    color: #f2f4f8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 16px;
-    box-sizing: border-box;
-    font-family: "Saira Stencil One", "Stencil Std", Impact, sans-serif;
+    background: var(--bg); color: var(--ink);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px;
+    padding: 32px max(16px, env(safe-area-inset-left, 0px)) 32px max(16px, env(safe-area-inset-right, 0px));
+    box-sizing: border-box; font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   h1 {
-    margin: 0;
-    font-weight: 400;
-    text-align: center;
-    line-height: 1.1;
-    letter-spacing: 0.03em;
-    font-size: clamp(2.2rem, 8vw, 6rem);
-    text-wrap: balance;
+    margin: 0; font-family: "Saira Stencil One", "Stencil Std", Impact, sans-serif; font-weight: 400;
+    text-align: center; line-height: 1.1; letter-spacing: 0.03em; font-size: clamp(2.2rem, 8vw, 6rem); text-wrap: balance;
   }
+  .box {
+    width: 100%; max-width: 560px; box-sizing: border-box;
+    background: var(--box); border: 2px solid var(--edge); border-radius: 14px; padding: 20px; display: grid; gap: 14px;
+  }
+  .box h2 {
+    margin: 0; font-family: "Saira Stencil One", Impact, sans-serif; font-weight: 400;
+    font-size: 1.5rem; letter-spacing: 0.04em; color: var(--muted);
+  }
+  .game {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px;
+    padding: 14px 16px; border-radius: 10px; background: var(--bg); border: 1px solid var(--edge);
+    color: var(--ink); text-decoration: none; transition: border-color .15s, transform .15s;
+  }
+  .game:hover, .game:focus-visible { border-color: var(--hi); transform: translateY(-2px); outline: none; }
+  .game .icon { font-size: 1.8rem; line-height: 1; }
+  .game b { display: block; font-size: 1.1rem; color: var(--ink); }
+  .game span { display: block; font-size: .9rem; color: var(--muted); }
+  .game .go { font-family: "Saira Stencil One", Impact, sans-serif; color: var(--hi); font-size: 1.1rem; }
+  @media (prefers-reduced-motion: reduce) { .game { transition: none; } .game:hover { transform: none; } }
 </style>
 </head>
 <body>
   <h1>Welcome to teamjackyeah</h1>
+  <section class="box" aria-labelledby="games">
+    <h2 id="games">Whimsical games</h2>
+    <a class="game" href="get-fat-or-dance-tryin/">
+      <span class="icon" aria-hidden="true">🍔</span>
+      <span><b>Get Fat or Dance Tryin'</b><span>2 players, 1 keyboard. Best on a laptop.</span></span>
+      <span class="go" aria-hidden="true">PLAY</span>
+    </a>
+  </section>
 </body>
 </html>
