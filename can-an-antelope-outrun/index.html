@@ -39,7 +39,6 @@ body{background:var(--deep);color:var(--ink);font-family:var(--pixel);overflow:h
 .speed{width:min(240px,70vw);height:12px;border:3px solid #000;background:#111}
 .speed i{display:block;height:100%;width:0;transition:width .1s}
 .pad.top .speed i{background:var(--ante)}.pad.bot .speed i{background:var(--chase)}
-.pad.flash{filter:brightness(1.35)}
 .mid{position:relative;background:var(--navy);border-block:4px solid #000;overflow:hidden}
 #world{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
 .banner{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:clamp(14px,5vw,26px);text-shadow:3px 3px 0 #000;pointer-events:none}
@@ -135,7 +134,7 @@ let level=1,state='menu',posA=0,posB=0,tapsA=[],tapsB=[],spA=0,spB=0,t0=0,countd
 const banner=document.getElementById('banner');
 function rate(arr,now){while(arr.length&&now-arr[0]>1000)arr.shift();return arr.length}
 function hit(pad,arr,who){
-  pad.addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='race')return;arr.push(performance.now());tone(who==='A'?660:330,.04,'square',.03);pad.classList.add('flash');setTimeout(()=>pad.classList.remove('flash'),60)});
+  pad.addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='race')return;arr.push(performance.now());tone(who==='A'?660:330,.04,'square',.03)});
 }
 hit(document.getElementById('padA'),tapsA,'A');hit(document.getElementById('padB'),tapsB,'B');
 document.addEventListener('contextmenu',e=>e.preventDefault());
@@ -216,8 +215,11 @@ function drawLevel2(t){
 }
 function drawExplosion(t){
   if(!explode)return;const e=(t-explode.t)/1000;
-  for(let i=0;i<60;i++){const a=i*2.4,r=e*60*(0.4+(i%7)/7);const c=['#fff2a0','#ffb84a','#ff5d2a','#ffffff'][i%4];px(explode.x+Math.cos(a)*r,explode.y+Math.sin(a)*r*0.7,2,2,c)}
-  if(e<0.25){ctx.globalAlpha=1-e*4;px(0,0,W,H,'#ffffff');ctx.globalAlpha=1}
+  // gentle explosion: a slow, steady puff of warm smoke. No white, no screen flash, no flicker.
+  const f=Math.min(1,e/1.6),fade=Math.max(0,1-Math.max(0,e-1.6)/2);
+  ctx.globalAlpha=0.85*fade;
+  for(let i=0;i<40;i++){const a=i*2.4,r=f*34*(0.45+(i%7)/12);const c=['#c8642a','#a8482a','#8a3a2a','#6a4a4a'][i%4];px(explode.x+Math.cos(a)*r,explode.y+Math.sin(a)*r*0.7,3,3,c)}
+  ctx.globalAlpha=1;
 }
 
 // ---------- loop ----------
