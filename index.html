@@ -1,60 +1,246 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>teamjackyeah</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=Figtree:wght@400;600&display=swap">
 <style>
-  :root { --bg:#0b1f4a; --ink:#f2f4f8; --muted:#a9b7d6; --box:#122b63; --edge:#2c4a8f; --hi:#ffd23f; }
-  html, body { height: 100%; margin: 0; }
-  body {
-    background: var(--bg); color: var(--ink);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px;
-    padding: 32px max(16px, env(safe-area-inset-left, 0px)) 32px max(16px, env(safe-area-inset-right, 0px));
-    box-sizing: border-box; font-family: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
-  }
-  h1 {
-    margin: 0; font-family: "Saira Stencil One", "Stencil Std", Impact, sans-serif; font-weight: 400;
-    text-align: center; line-height: 1.1; letter-spacing: 0.03em; font-size: clamp(2.2rem, 8vw, 6rem); text-wrap: balance;
-  }
-  .box {
-    width: 100%; max-width: 560px; box-sizing: border-box;
-    background: var(--box); border: 2px solid var(--edge); border-radius: 14px; padding: 20px; display: grid; gap: 14px;
-  }
-  .box h2 {
-    margin: 0; font-family: "Saira Stencil One", Impact, sans-serif; font-weight: 400;
-    font-size: 1.5rem; letter-spacing: 0.04em; color: var(--muted);
-  }
-  .game {
-    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px;
-    padding: 14px 16px; border-radius: 10px; background: var(--bg); border: 1px solid var(--edge);
-    color: var(--ink); text-decoration: none; transition: border-color .15s, transform .15s;
-  }
-  .game:hover, .game:focus-visible { border-color: var(--hi); transform: translateY(-2px); outline: none; }
-  .game .icon { font-size: 1.8rem; line-height: 1; }
-  .game b { display: block; font-size: 1.1rem; color: var(--ink); }
-  .game span { display: block; font-size: .9rem; color: var(--muted); }
-  .game .go { font-family: "Saira Stencil One", Impact, sans-serif; color: var(--hi); font-size: 1.1rem; }
-  @media (prefers-reduced-motion: reduce) { .game { transition: none; } .game:hover { transform: none; } }
+  html, body { margin: 0; height: 100%; background: #0d0b09; overflow: hidden; }
+  #wall { position: fixed; inset: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  #wall::-webkit-scrollbar { display: none; }
+  #stage { position: relative; }
+  #stage img, #stage canvas, #light { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+  #stage img { user-select: none; -webkit-user-drag: none; }
+  #stage a { position: absolute; display: block; cursor: default; outline: none; -webkit-tap-highlight-color: transparent; z-index: 2; }
+  #light { pointer-events: none; mix-blend-mode: soft-light; background: linear-gradient(100deg, #ffb45a 0%, #ff9a4a 35%, #2b3f78 100%); opacity: 0; }
 </style>
 </head>
 <body>
-  <h1>Welcome to teamjackyeah</h1>
-  <section class="box" aria-labelledby="games">
-    <h2 id="games">Whimsical games</h2>
-    <a class="game" href="get-fat-or-dance-tryin/">
-      <span class="icon" aria-hidden="true">🍔</span>
-      <span><b>Get Fat or Dance Tryin'</b><span>2 players, 1 keyboard. Best on a laptop.</span></span>
-      <span class="go" aria-hidden="true">PLAY</span>
-    </a>
-    <a class="game" href="can-an-antelope-outrun/">
-      <span class="icon" aria-hidden="true">🦌</span>
-      <span><b>Can an Antelope Outrun...</b><span>2 players, 1 phone. Lay it flat and tap.</span></span>
-      <span class="go" aria-hidden="true">PLAY</span>
-    </a>
-  </section>
+<div id="wall">
+  <div id="stage">
+    <img id="painting" src="piazza.jpg" alt="Oil painting of a Sicilian piazza at dusk, with cafe tables under striped awnings">
+    <canvas id="c" width="1800" height="1200"></canvas>
+    <div id="light"></div>
+    <a href="get-fat-or-dance-tryin/" aria-label="Get Fat or Dance Tryin'" style="left:3.44%;top:15.42%;width:3.06%;height:8.17%"></a>
+    <a href="can-an-antelope-outrun/" aria-label="Can an Antelope Outrun" style="left:11.00%;top:15.58%;width:2.89%;height:8.00%"></a>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var W = 1800, H = 1200;
+  var wall = document.getElementById('wall'), stage = document.getElementById('stage');
+  var img = document.getElementById('painting'), light = document.getElementById('light');
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  var SPEED = location.hash === '#fast' ? 8 : 1;
+
+  /* fill the screen; on narrow screens the painting is taller than wide, so it pans sideways */
+  function layout() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var s = Math.max(vw / W, vh / H);
+    stage.style.width = Math.round(W * s) + 'px';
+    stage.style.height = Math.round(H * s) + 'px';
+    stage.style.marginTop = Math.round(Math.min(0, (vh - H * s) * 0.62)) + 'px';
+    wall.scrollLeft = (W * s - vw) * 0.46;
+  }
+  window.addEventListener('resize', layout);
+  layout();
+
+  function rr(a, b) { return a + (b - a) * Math.random(); }
+  function ease(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+
+  /* ---------- rooms behind the open shutters ----------
+     Two versions of the same painting: this one with dark rooms, and one with every room lit.
+     Switching a light on fades in that window's patch of the lit painting, so it is all real paint. */
+  var lit = new Image(); lit.src = 'lit.jpg';
+  var SCENE_H = 620, scene = document.createElement('canvas'), sctx = scene.getContext('2d'), sceneDirty = true;
+  scene.width = W; scene.height = SCENE_H;
+  var rooms = [[62,185,55,98],[62,424,54,112],[198,187,52,96],[198,423,53,146],[334,189,57,146],[335,423,57,112],
+    [515,192,58,118],[515,405,59,149],[659,193,57,124],[659,404,57,123],[799,194,59,118],[799,405,60,144],
+    [975,273,62,166],[977,499,60,92],[1131,274,60,166],[1133,499,58,92],[1283,274,60,165],[1286,499,58,91],
+    [1464,216,56,163],[1464,431,55,157],[1597,229,65,151],[1596,431,59,158]
+  ].map(function (r) { return { r: r, level: 0, target: 0, next: rr(3, 70), patch: null }; });
+  [2, 6, 9, 14, 19].forEach(function (i) { rooms[i].level = 1; rooms[i].target = 1; rooms[i].next = rr(40, 150); });
+  var PAD = 8;
+  function buildPatches() {
+    rooms.forEach(function (m) {
+      var r = m.r, w = r[2] + PAD * 2, h = r[3] + PAD * 2;
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var x = c.getContext('2d');
+      x.shadowColor = '#000'; x.shadowBlur = 7; x.fillStyle = '#000';
+      x.fillRect(PAD, PAD, r[2], r[3]);
+      x.shadowBlur = 0; x.globalCompositeOperation = 'source-in';
+      x.drawImage(lit, r[0] - PAD, r[1] - PAD, w, h, 0, 0, w, h);
+      m.patch = c;
+    });
+  }
+  function stepRooms(dt) {
+    rooms.forEach(function (m) {
+      m.next -= dt;
+      if (m.next <= 0) {
+        var on = rooms.filter(function (x) { return x.target === 1; }).length;
+        m.target = m.target === 1 ? 0 : (on < 9 ? 1 : 0);
+        m.next = m.target === 1 ? rr(45, 170) : rr(25, 110);
+      }
+      if (m.level !== m.target) {
+        m.level += Math.sign(m.target - m.level) * Math.min(Math.abs(m.target - m.level), dt / 0.9);
+        sceneDirty = true;
+      }
+    });
+  }
+  function paintRooms(c) {
+    rooms.forEach(function (m) {
+      if (m.level <= 0.005 || !m.patch) return;
+      c.globalAlpha = ease(m.level);
+      c.drawImage(m.patch, m.r[0] - PAD, m.r[1] - PAD);
+    });
+    c.globalAlpha = 1;
+  }
+  function refreshScene() {
+    if (!sceneDirty) return;
+    sceneDirty = false;
+    sctx.drawImage(img, 0, 0, W, SCENE_H, 0, 0, W, SCENE_H);
+    paintRooms(sctx);
+  }
+
+  /* lamps inside the cafes: a slow, small breathing glow */
+  var lamps = [[222,734,70],[330,738,60],[690,740,70],[815,738,70],[545,742,60],[1135,732,70],[1020,728,50],[1590,738,60]]
+    .map(function (l) { return { x: l[0], y: l[1], r: l[2], ph: rr(0, 6.28), sp: rr(0.25, 0.5) }; });
+  function drawLamps(t) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    lamps.forEach(function (l) {
+      var a = 0.05 + 0.03 * Math.sin(t * l.sp + l.ph);
+      var g = ctx.createRadialGradient(l.x, l.y, 2, l.x, l.y, l.r);
+      g.addColorStop(0, 'rgba(255,180,90,' + a + ')'); g.addColorStop(1, 'rgba(255,160,70,0)');
+      ctx.fillStyle = g; ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+    });
+    ctx.restore();
+  }
+
+  /* ---------- everything below moves the painting's own paint, in thin slices ---------- */
+  function gustAt(t, k) { return 0.55 + 0.45 * Math.sin(t * 0.12 + k); }
+
+  var garments = [[565,36],[601,37],[638,42],[680,36],[716,46],[762,43]].map(function (g) {
+    return { x: g[0], w: g[1], ph: rr(0, 6.28), sp: rr(0.7, 1.1) };
+  });
+  function drawWashing(t) {
+    var top = 512, bot = 594, step = 3, gust = gustAt(t, 0);
+    garments.forEach(function (g) {
+      var sway = (2.6 * Math.sin(t * g.sp + g.ph) + 1.1 * Math.sin(t * g.sp * 2.3 + g.ph)) * gust;
+      for (var y = top; y < bot; y += step) {
+        var f = (y - top) / (bot - top), prof = f < 0.72 ? f / 0.72 : (1 - f) / 0.28;
+        ctx.drawImage(scene, g.x, y, g.w, step, g.x + sway * prof, y, g.w, step);
+      }
+    });
+  }
+
+  var awnings = [{ x: 0, w: 452, top: 682, edge: 713, bot: 727 }, { x: 908, w: 558, top: 686, edge: 716, bot: 730 }];
+  function drawAwnings(t) {
+    awnings.forEach(function (a, i) {
+      var cw = 6, gust = gustAt(t, 2 + i * 2), h1 = a.edge - a.top, h2 = a.bot - a.edge;
+      for (var x = a.x; x < a.x + a.w; x += cw) {
+        var d = (1.6 * Math.sin(x * 0.035 - t * 1.1 + i) + 0.9 * Math.sin(x * 0.011 + t * 0.6)) * gust;
+        ctx.drawImage(img, x, a.top, cw, h1, x, a.top, cw, h1 + d);
+        ctx.drawImage(img, x, a.edge, cw, h2, x, a.edge + d, cw, h2 - d);
+      }
+    });
+  }
+
+  /* trees in pots and balcony plants: leaves shift a little, the edges of each patch stay put */
+  var plants = [
+    { x: 890, y: 722, w: 118, h: 88, amp: 2.2, k: 1 },   /* lemon tree */
+    { x: 1318, y: 722, w: 130, h: 92, amp: 2.2, k: 3 },  /* pink flowering tree */
+    { x: 4, y: 284, w: 170, h: 96, amp: 1.5, k: 5 },     /* geraniums, upper balcony */
+    { x: 270, y: 268, w: 160, h: 60, amp: 1.2, k: 6 },
+    { x: 4, y: 516, w: 190, h: 82, amp: 1.5, k: 7 },     /* lower balcony */
+    { x: 290, y: 518, w: 140, h: 50, amp: 1.2, k: 8 }
+  ].map(function (p) { p.ph = rr(0, 6.28); p.sp = rr(0.5, 0.8); return p; });
+  function drawPlants(t) {
+    plants.forEach(function (p) {
+      var gust = gustAt(t, p.k), step = 3;
+      for (var y = 0; y < p.h; y += step) {
+        var f = y / p.h, prof = Math.pow(Math.sin(Math.PI * f), 0.8);
+        var dx = p.amp * gust * prof * (Math.sin(t * p.sp + p.ph + f * 2.2) + 0.45 * Math.sin(t * p.sp * 2.7 + f * 7));
+        ctx.drawImage(p.y < 600 ? scene : img, p.x, p.y + y, p.w, step, p.x + dx, p.y + y, p.w, step);
+      }
+    });
+  }
+
+  /* clouds: a copy of the painted clouds drifts slowly across the painted sky, hidden behind the roofs */
+  var SKY_H = 440, cloud = null, skyMask = null, skyTmp = null, skyBase = null;
+  function buildSky() {
+    try {
+      var src = document.createElement('canvas'); src.width = W; src.height = SKY_H;
+      var sx = src.getContext('2d'); sx.drawImage(img, 0, 0, W, SKY_H, 0, 0, W, SKY_H);
+      var d = sx.getImageData(0, 0, W, SKY_H), px = d.data;
+      var cl = sx.createImageData(W, SKY_H), mk = sx.createImageData(W, SKY_H);
+      for (var x = 0; x < W; x++) {
+        var open = true;
+        for (var y = 0; y < SKY_H; y++) {
+          var i = (y * W + x) * 4, r = px[i], g = px[i + 1], b = px[i + 2];
+          if (open && !(b > r + 6 && b > 60)) { if (y + 3 < SKY_H) { var j = ((y + 3) * W + x) * 4; if (!(px[j + 2] > px[j] + 6)) open = false; } else open = false; }
+          if (!open) break;
+          mk.data[i + 3] = 255;
+          var lum = (r + g + b) / 3, a = Math.max(0, Math.min(1, (lum - 105) / 60));
+          cl.data[i] = r; cl.data[i + 1] = g; cl.data[i + 2] = b; cl.data[i + 3] = Math.round(a * 215);
+        }
+      }
+      cloud = document.createElement('canvas'); cloud.width = W; cloud.height = SKY_H; cloud.getContext('2d').putImageData(cl, 0, 0);
+      var raw = document.createElement('canvas'); raw.width = W; raw.height = SKY_H; raw.getContext('2d').putImageData(mk, 0, 0);
+      /* pull the mask back from the rooflines so no cloud leaks onto a chimney */
+      skyMask = document.createElement('canvas'); skyMask.width = W; skyMask.height = SKY_H;
+      var mx = skyMask.getContext('2d'); mx.drawImage(raw, 0, 0);
+      mx.globalCompositeOperation = 'destination-in';
+      [[3, 0], [-3, 0], [0, -4], [2, -3], [-2, -3]].forEach(function (o) { mx.drawImage(raw, o[0], o[1]); });
+      skyTmp = document.createElement('canvas'); skyTmp.width = W; skyTmp.height = SKY_H;
+      /* a calm version of the sky, with the painted clouds smoothed away, for the moving clouds to cross */
+      var only = document.createElement('canvas'); only.width = W; only.height = SKY_H;
+      var ox = only.getContext('2d'); ox.drawImage(img, 0, 0, W, SKY_H, 0, 0, W, SKY_H);
+      ox.globalCompositeOperation = 'destination-in'; ox.drawImage(raw, 0, 0);
+      var small = document.createElement('canvas'); small.width = 90; small.height = 22;
+      var smx = small.getContext('2d'); smx.imageSmoothingEnabled = true;
+      smx.drawImage(only, 0, 0, 90, 22);
+      skyBase = document.createElement('canvas'); skyBase.width = W; skyBase.height = SKY_H;
+      var bx = skyBase.getContext('2d'); bx.imageSmoothingEnabled = true;
+      for (var k = 0; k < 4; k++) bx.drawImage(small, 0, 0, W, SKY_H);
+      bx.globalCompositeOperation = 'destination-in'; bx.drawImage(skyMask, 0, 0);
+    } catch (e) { cloud = null; }
+  }
+  function drawClouds(t) {
+    if (!cloud) return;
+    var dx = (t * 10) % W, tx = skyTmp.getContext('2d');
+    tx.globalCompositeOperation = 'source-over';
+    tx.clearRect(0, 0, W, SKY_H);
+    tx.globalAlpha = 0.72; tx.drawImage(skyBase, 0, 0); tx.globalAlpha = 1;
+    tx.drawImage(cloud, dx, 0); tx.drawImage(cloud, dx - W, 0);
+    tx.globalCompositeOperation = 'destination-in';
+    tx.drawImage(skyMask, 0, 0);
+    ctx.drawImage(skyTmp, 0, 0);
+  }
+
+  /* ---------- main loop ---------- */
+  var clock = 0, last = null, ready = false;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (last === null) last = now;
+    if ((now - last) < 30 && SPEED === 1) return;
+    var dt = Math.min(0.1, (now - last) / 1000) * SPEED;
+    last = now; clock += dt;
+    if (!img.complete || !img.naturalWidth || !lit.complete || !lit.naturalWidth) return;
+    if (!ready) { ready = true; buildSky(); buildPatches(); }
+    stepRooms(dt); refreshScene();
+    ctx.clearRect(0, 0, W, H);
+    drawClouds(clock);
+    paintRooms(ctx);
+    drawPlants(clock);
+    drawWashing(clock);
+    drawAwnings(clock);
+    drawLamps(clock);
+    light.style.opacity = (0.1 + 0.1 * Math.sin(clock * 0.045)).toFixed(3);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
