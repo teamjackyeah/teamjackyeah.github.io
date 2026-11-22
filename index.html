@@ -1,246 +1,1500 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IE">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>teamjackyeah</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ballydeselby</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 shape-rendering=%22crispEdges%22%3E%3Crect width=%2216%22 height=%2216%22 fill=%22%230e1424%22/%3E%3Crect x=%222%22 y=%227%22 width=%2212%22 height=%229%22 fill=%22%23efe6d2%22/%3E%3Crect x=%221%22 y=%225%22 width=%2214%22 height=%223%22 fill=%22%234a5560%22/%3E%3Crect x=%224%22 y=%2210%22 width=%223%22 height=%223%22 fill=%22%23ffb648%22/%3E%3Crect x=%229%22 y=%2210%22 width=%223%22 height=%223%22 fill=%22%23ffb648%22/%3E%3Crect x=%2212%22 y=%221%22 width=%222%22 height=%222%22 fill=%22%23f3f0dc%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Pixelify+Sans:wght@400;600&display=swap">
 <style>
-  html, body { margin: 0; height: 100%; background: #0d0b09; overflow: hidden; }
-  #wall { position: fixed; inset: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-  #wall::-webkit-scrollbar { display: none; }
-  #stage { position: relative; }
-  #stage img, #stage canvas, #light { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
-  #stage img { user-select: none; -webkit-user-drag: none; }
-  #stage a { position: absolute; display: block; cursor: default; outline: none; -webkit-tap-highlight-color: transparent; z-index: 2; }
-  #light { pointer-events: none; mix-blend-mode: soft-light; background: linear-gradient(100deg, #ffb45a 0%, #ff9a4a 35%, #2b3f78 100%); opacity: 0; }
+:root{
+  /* Layout: a full-bleed pixel street on top, the parish log in one ruled column beneath.
+     One visual world, by choice: the page colours follow the parish sky and are set from script. */
+  --bg:#dfe5e1;      /* limestone by day, navy by night */
+  --ink:#1c2a2d;
+  --soft:#56676a;
+  --line:#b9c6c0;
+  --accent:#0b6b46;  /* post-office green by day, pub-window amber by night */
+  --panel:#eef2ee;
+  --pixel:"Pixelify Sans","Courier New",ui-monospace,monospace;
+  --body:"Alegreya",Georgia,"Times New Roman",serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
+body.on{transition:background-color 3s linear,color 3s linear}
+button{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding-bottom:40px}
+.stage{position:relative;overflow:hidden;background:#0b1026;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+#cv{display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:pan-y;cursor:grab;outline:none}
+#cv.drag{cursor:grabbing}
+#cv:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.mast{position:absolute;left:12px;top:9px;pointer-events:none;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.6),0 0 8px rgba(0,0,0,.45)}
+.mast h1{font:600 21px/1 var(--pixel);margin:0;letter-spacing:.02em}
+.mast p{font:400 13px/1.25 var(--pixel);margin:4px 0 0}
+.tools{position:absolute;right:8px;top:8px;display:flex;gap:6px}
+.tools button,.time button{font:400 13px/1 var(--pixel);padding:8px 10px;border:1px solid rgba(255,255,255,.5);background:rgba(10,16,38,.6);color:#fff;border-radius:3px;cursor:pointer;min-height:32px}
+.tools button[aria-pressed="true"],.tools button.peek{background:#f2b65a;color:#1a1420;border-color:#f2b65a}
+.tools button:focus-visible,.time button:focus-visible,.card button:focus-visible{outline:2px solid #f2b65a;outline-offset:2px}
+.hint{position:absolute;left:0;right:0;bottom:8px;margin:0;padding:0 12px;text-align:center;font:400 12px/1.35 var(--pixel);text-wrap:balance;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.7);pointer-events:none;transition:opacity 1.5s}
+.card{position:absolute;max-width:min(290px,calc(100% - 16px));background:#fbfaf4;color:#1c2a2d;border:2px solid #1c2a2d;border-radius:3px;padding:9px 11px 10px;box-shadow:3px 3px 0 rgba(0,0,0,.35);font-size:15.5px;line-height:1.35;z-index:3}
+.card h3{font:600 15px/1.15 var(--pixel);margin:0 0 2px}
+.card .role{margin:0 0 6px;color:#56676a;font-style:italic;font-size:14.5px}
+.card p{margin:0 0 5px}
+.card p:last-child{margin-bottom:0}
+.card .say{border-left:3px solid #0b6b46;padding-left:8px}
+.card button{font:400 13px/1 var(--pixel);margin-top:4px;padding:8px 10px;background:#1c2a2d;color:#fbfaf4;border:0;border-radius:3px;cursor:pointer}
+#mini{display:block;width:100%;height:16px;touch-action:none;cursor:pointer;background:var(--panel)}
+.time{background:#141b33;color:#e6ebf5;padding:10px 16px 12px;display:grid;gap:8px}
+.time[hidden]{display:none}
+.time .row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.time .lbl{font:400 13px/1.25 var(--pixel);text-align:center}
+.time input[type=range]{width:100%;accent-color:#f2b65a;height:28px}
+.time .note{margin:0;font-size:14.5px;color:#aeb8cf;font-style:italic}
+.col{padding:0 16px;max-width:680px;margin:0 auto}
+.now{margin:14px 0 0;font-size:18px;line-height:1.35;font-weight:500;text-wrap:balance;min-height:2.7em}
+.log h2{font:600 17px/1.2 var(--pixel);margin:20px 0 2px;letter-spacing:.02em}
+.since{margin:0 0 6px;color:var(--soft);font-style:italic;font-size:15.5px}
+.day{font:400 13px/1.2 var(--pixel);color:var(--soft);margin:16px 0 0;padding:0 0 4px;border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:.06em}
+ol.ev{list-style:none;margin:0;padding:0}
+ol.ev li{display:grid;grid-template-columns:3.3em 1fr;gap:6px;padding:7px 0;border-bottom:1px solid var(--line)}
+ol.ev time{font-variant-numeric:tabular-nums;color:var(--soft);font-size:15px;padding-top:1px}
+ol.ev li.you span{color:var(--accent);font-weight:500}
+ol.ev li.mark{display:block;text-align:center;font-style:italic;color:var(--accent);font-size:15px;border-bottom:1px dashed var(--accent)}
+.foot{margin:22px 0 0;color:var(--soft);font-size:15px;font-style:italic}
+@media (prefers-reduced-motion:reduce){body.on{transition:none}}
 </style>
 </head>
 <body>
-<div id="wall">
-  <div id="stage">
-    <img id="painting" src="piazza.jpg" alt="Oil painting of a Sicilian piazza at dusk, with cafe tables under striped awnings">
-    <canvas id="c" width="1800" height="1200"></canvas>
-    <div id="light"></div>
-    <a href="get-fat-or-dance-tryin/" aria-label="Get Fat or Dance Tryin'" style="left:3.44%;top:15.42%;width:3.06%;height:8.17%"></a>
-    <a href="can-an-antelope-outrun/" aria-label="Can an Antelope Outrun" style="left:11.00%;top:15.58%;width:2.89%;height:8.00%"></a>
+<main class="wrap">
+  <section class="stage" id="stage" aria-label="The street in Ballydeselby">
+    <canvas id="cv" tabindex="0" role="img" aria-label="A pixel village street in south Galway, running on the real time of day. Drag sideways to walk along it. Tap people and buildings."></canvas>
+    <header class="mast"><h1>Ballydeselby</h1><p id="sub">South Galway</p></header>
+    <div class="tools">
+      <button id="bSound" type="button" aria-pressed="false">Sound off</button>
+      <button id="bClock" type="button" aria-expanded="false" aria-controls="tp">--:--</button>
+    </div>
+    <div class="card" id="card" hidden></div>
+    <p class="hint" id="hint">Drag to walk the street. Tap anyone, or anything. The clock opens other hours.</p>
+  </section>
+  <canvas id="mini" aria-label="Map of the street. Drag to move along it."></canvas>
+  <section class="time" id="tp" hidden>
+    <div class="row">
+      <button id="tPrev" type="button" aria-label="The day before">&minus; day</button>
+      <span class="lbl" id="tLabel"></span>
+      <button id="tNext" type="button" aria-label="The day after">+ day</button>
+    </div>
+    <input type="range" id="tRange" min="0" max="1439" step="1" aria-label="Time of day in the parish">
+    <div class="row">
+      <button id="tRun" type="button">Run the day</button>
+      <span></span>
+      <button id="tNow" type="button">Back to now</button>
+    </div>
+    <p class="note">It is all decided already. Tomorrow's bus will be late whether you look or not.</p>
+  </section>
+  <div class="col">
+    <p class="now" id="now" aria-live="polite"></p>
+    <section class="log">
+      <h2>The parish log</h2>
+      <p class="since" id="since"></p>
+      <div id="log"></div>
+    </section>
+    <p class="foot">Ballydeselby keeps the real time and the real sun and moon for south Galway. The weather is its own. It carries on when you are not looking.</p>
   </div>
-</div>
+</main>
 <script>
-(function () {
-  'use strict';
-  var W = 1800, H = 1200;
-  var wall = document.getElementById('wall'), stage = document.getElementById('stage');
-  var img = document.getElementById('painting'), light = document.getElementById('light');
-  var cv = document.getElementById('c'), ctx = cv.getContext('2d');
-  var SPEED = location.hash === '#fast' ? 8 : 1;
+'use strict';
+/* ================= core: constants, random, time, sky, weather ================= */
+const TZ='Europe/Dublin',LAT=53.066,LON=-8.95;
+const MIN=60000,HOUR=3600000,DAY=86400000,PI=Math.PI,TAU=PI*2,RAD=PI/180;
+const W=1100,H=168,GY=136;
+const clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,f)=>a+(b-a)*f;
+const smooth=(a,b,x)=>{const f=clamp((x-a)/(b-a),0,1);return f*f*(3-2*f)};
+function hash(){let h=2166136261>>>0;for(let i=0;i<arguments.length;i++){const s=String(arguments[i]);for(let j=0;j<s.length;j++){h^=s.charCodeAt(j);h=Math.imul(h,16777619)}h^=124;h=Math.imul(h,16777619)}h^=h>>>13;h=Math.imul(h,0x5bd1e995);h^=h>>>15;return h>>>0}
+function rng(seed){let a=seed>>>0;return function(){a=a+0x6D2B79F5|0;let x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296}}
+function h01(){return hash.apply(null,arguments)/4294967296}
 
-  /* fill the screen; on narrow screens the painting is taller than wide, so it pans sideways */
-  function layout() {
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var s = Math.max(vw / W, vh / H);
-    stage.style.width = Math.round(W * s) + 'px';
-    stage.style.height = Math.round(H * s) + 'px';
-    stage.style.marginTop = Math.round(Math.min(0, (vh - H * s) * 0.62)) + 'px';
-    wall.scrollLeft = (W * s - vw) * 0.46;
-  }
-  window.addEventListener('resize', layout);
-  layout();
+/* ---- parish time: Irish local time; the parish day runs 04:00 to 04:00 ---- */
+let _fmt=null;try{_fmt=new Intl.DateTimeFormat('en-GB',{timeZone:TZ,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}catch(e){}
+const _off=new Map();
+function tzOff(ms){const k=Math.floor(ms/HOUR);let v=_off.get(k);if(v!==undefined)return v;v=0;
+  try{const p={};for(const x of _fmt.formatToParts(new Date(k*HOUR)))p[x.type]=x.value;
+    v=Math.round((Date.UTC(+p.year,+p.month-1,+p.day,(+p.hour)%24,+p.minute)-k*HOUR)/MIN)}catch(e){v=0}
+  if(_off.size>5000)_off.clear();_off.set(k,v);return v}
+function pday(ms){return Math.floor((ms+tzOff(ms)*MIN-4*HOUR)/DAY)}
+function pdayStart(pd){const g=pd*DAY+4*HOUR;return g-tzOff(g)*MIN}
+function pmin(ms){return(ms-pdayStart(pday(ms)))/MIN}
+const _di=new Map();
+function dinfo(pd){let v=_di.get(pd);if(v)return v;const ms=pdayStart(pd)+6*HOUR,d=new Date(ms+tzOff(ms)*MIN);
+  const y=d.getUTCFullYear(),mo=d.getUTCMonth()+1,dd=d.getUTCDate();
+  v={pd,y,mo,d:dd,dow:d.getUTCDay(),doy:Math.round((Date.UTC(y,mo-1,dd)-Date.UTC(y,0,1))/DAY)+1,md:mo*100+dd};
+  if(_di.size>600)_di.clear();_di.set(pd,v);return v}
+function t(s){return((+s.slice(0,2))*60+(+s.slice(3,5))-240+1440)%1440}
+function clock(pm){const m=((Math.round(pm)+240)%1440+1440)%1440;return String(m/60|0).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+function cal(ms){const d=new Date(ms+tzOff(ms)*MIN);return{dow:d.getUTCDay(),d:d.getUTCDate(),mo:d.getUTCMonth()+1}}
+const DOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  function rr(a, b) { return a + (b - a) * Math.random(); }
-  function ease(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+/* ---- sun and moon over south Galway ---- */
+function altaz(ms,ra,dec){const d=ms/DAY-10957.5,gmst=(18.697374558+24.06570982441908*d)%24;
+  const ha=RAD*(gmst*15+LON)-ra,la=RAD*LAT;
+  const alt=Math.asin(Math.sin(la)*Math.sin(dec)+Math.cos(la)*Math.cos(dec)*Math.cos(ha));
+  const az=Math.atan2(-Math.sin(ha)*Math.cos(dec),Math.sin(dec)*Math.cos(la)-Math.cos(dec)*Math.sin(la)*Math.cos(ha));
+  return{alt:alt/RAD,az:(az/RAD+360)%360}}
+function sunLon(ms){const d=ms/DAY-10957.5,g=RAD*((357.529+0.98560028*d)%360),q=(280.459+0.98564736*d)%360;return RAD*(q+1.915*Math.sin(g)+0.020*Math.sin(2*g))}
+function sunPos(ms){const L=sunLon(ms),e=RAD*23.439;return altaz(ms,Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L)),Math.asin(Math.sin(e)*Math.sin(L)))}
+const SYN=29.530588853*DAY,NEW0=Date.UTC(2000,0,6,18,14);
+function moonPos(ms){const age=(((ms-NEW0)%SYN)+SYN)%SYN/SYN,d=ms/DAY-10957.5,e=RAD*23.439;
+  const Lm=sunLon(ms)+age*TAU,bet=RAD*5.1*Math.sin(Lm-RAD*((125.04-0.052954*d)%360));
+  const ra=Math.atan2(Math.sin(Lm)*Math.cos(e)-Math.tan(bet)*Math.sin(e),Math.cos(Lm));
+  const dec=Math.asin(Math.sin(bet)*Math.cos(e)+Math.cos(bet)*Math.sin(e)*Math.sin(Lm));
+  const p=altaz(ms,ra,dec);p.age=age;p.illum=(1-Math.cos(age*TAU))/2;return p}
+function moonName(age){const a=age*8;return a<0.5||a>=7.5?'New moon':a<1.5?'Waxing crescent':a<2.5?'First quarter':a<3.5?'Waxing gibbous':a<4.5?'Full moon':a<5.5?'Waning gibbous':a<6.5?'Last quarter':'Waning crescent'}
+const _sun=new Map();
+function sunTimes(pd){let v=_sun.get(pd);if(v)return v;const t0=pdayStart(pd);let rise=null,set=null,prev=sunPos(t0).alt;
+  for(let m=2;m<=1440;m+=2){const a=sunPos(t0+m*MIN).alt;if(prev<-0.83&&a>=-0.83&&rise==null)rise=m;if(prev>=-0.83&&a<-0.83)set=m;prev=a}
+  v={rise:rise==null?200:rise,set:set==null?1000:set};if(_sun.size>600)_sun.clear();_sun.set(pd,v);return v}
 
-  /* ---------- rooms behind the open shutters ----------
-     Two versions of the same painting: this one with dark rooms, and one with every room lit.
-     Switching a light on fades in that window's patch of the lit painting, so it is all real paint. */
-  var lit = new Image(); lit.src = 'lit.jpg';
-  var SCENE_H = 620, scene = document.createElement('canvas'), sctx = scene.getContext('2d'), sceneDirty = true;
-  scene.width = W; scene.height = SCENE_H;
-  var rooms = [[62,185,55,98],[62,424,54,112],[198,187,52,96],[198,423,53,146],[334,189,57,146],[335,423,57,112],
-    [515,192,58,118],[515,405,59,149],[659,193,57,124],[659,404,57,123],[799,194,59,118],[799,405,60,144],
-    [975,273,62,166],[977,499,60,92],[1131,274,60,166],[1133,499,58,92],[1283,274,60,165],[1286,499,58,91],
-    [1464,216,56,163],[1464,431,55,157],[1597,229,65,151],[1596,431,59,158]
-  ].map(function (r) { return { r: r, level: 0, target: 0, next: rr(3, 70), patch: null }; });
-  [2, 6, 9, 14, 19].forEach(function (i) { rooms[i].level = 1; rooms[i].target = 1; rooms[i].next = rr(40, 150); });
-  var PAD = 8;
-  function buildPatches() {
-    rooms.forEach(function (m) {
-      var r = m.r, w = r[2] + PAD * 2, h = r[3] + PAD * 2;
-      var c = document.createElement('canvas'); c.width = w; c.height = h;
-      var x = c.getContext('2d');
-      x.shadowColor = '#000'; x.shadowBlur = 7; x.fillStyle = '#000';
-      x.fillRect(PAD, PAD, r[2], r[3]);
-      x.shadowBlur = 0; x.globalCompositeOperation = 'source-in';
-      x.drawImage(lit, r[0] - PAD, r[1] - PAD, w, h, 0, 0, w, h);
-      m.patch = c;
-    });
-  }
-  function stepRooms(dt) {
-    rooms.forEach(function (m) {
-      m.next -= dt;
-      if (m.next <= 0) {
-        var on = rooms.filter(function (x) { return x.target === 1; }).length;
-        m.target = m.target === 1 ? 0 : (on < 9 ? 1 : 0);
-        m.next = m.target === 1 ? rr(45, 170) : rr(25, 110);
-      }
-      if (m.level !== m.target) {
-        m.level += Math.sign(m.target - m.level) * Math.min(Math.abs(m.target - m.level), dt / 0.9);
-        sceneDirty = true;
-      }
-    });
-  }
-  function paintRooms(c) {
-    rooms.forEach(function (m) {
-      if (m.level <= 0.005 || !m.patch) return;
-      c.globalAlpha = ease(m.level);
-      c.drawImage(m.patch, m.r[0] - PAD, m.r[1] - PAD);
-    });
-    c.globalAlpha = 1;
-  }
-  function refreshScene() {
-    if (!sceneDirty) return;
-    sceneDirty = false;
-    sctx.drawImage(img, 0, 0, W, SCENE_H, 0, 0, W, SCENE_H);
-    paintRooms(sctx);
-  }
+/* ---- the weather is the parish's own: smooth noise over time, wetter in winter ---- */
+function vnoise(x,seed){const i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return lerp(h01(seed,i),h01(seed,i+1),u)}
+function seasonCos(ms){return Math.cos(((ms/DAY-15)%365.25)/365.25*TAU)} /* +1 mid January, -1 mid July */
+function wxCore(ms){const th=ms/HOUR,sc=seasonCos(ms);
+  const wet=0.55*vnoise(th/6,'w1')+0.3*vnoise(th/2.1,'w2')+0.15*vnoise(th/0.7,'w3')+0.025*sc;
+  const rain=clamp((wet-0.63)/0.16,0,1);
+  const cloud=clamp(0.3+(wet-0.5)*2.4+0.4*(vnoise(th/9,'c1')-0.5),0,1);
+  const wind=clamp(0.15+0.65*vnoise(th/4,'wd')+0.25*rain,0,1);
+  return{wet,rain,cloud,wind}}
+function wxAt(ms){const c=wxCore(ms),sc=seasonCos(ms),alt=sunPos(ms).alt,lt=((ms+tzOff(ms)*MIN)%DAY+DAY)%DAY/HOUR;
+  c.temp=10.4-5.3*sc+(1-c.cloud*0.6)*clamp(alt/14,-1,1.7)*2.3+(vnoise(ms/HOUR/30,'t1')-0.5)*7-c.rain*0.8;
+  c.mist=(lt>4&&lt<10.5&&c.wind<0.5&&c.rain===0)?smooth(0.62,0.8,vnoise(ms/HOUR/7,'m1'))*smooth(10.5,8.5,lt):0;return c}
+let _wxK=-1,_wxV=null;
+function wx(ms){const k=Math.floor(ms/4000);if(k===_wxK)return _wxV;_wxK=k;_wxV=wxAt(ms);return _wxV}
+function rainPm(pd,pm){return wxCore(pdayStart(pd)+pm*MIN).rain>0}
+function rainHours(pd,upto){let n=0;const t0=pdayStart(pd),lim=upto==null?1440:upto;for(let m=5;m<lim;m+=10)if(wxCore(t0+m*MIN).rain>0)n++;return n/6}
+/* the turlough: full in winter, gone in summer, with a say for recent weather */
+function turlough(ms){return clamp(0.5+0.62*seasonCos(ms-25*DAY)+0.3*(vnoise(ms/DAY/9,'tl')-0.5),0,1)}
+/* ================= world: places, opening hours, buses ================= */
+const PL={
+  farm:{x:30,in:1,label:"Regan's yard"},farmgate:{x:70,label:'the farm gate'},
+  cottage:{x:124,in:1,label:"Quinn's"},line:{x:174,label:'the washing line',layer:1,y:134},
+  garda:{x:225,in:1,label:'the barracks'},
+  shop:{x:304,in:1,label:'the shop'},shopfront:{x:296,label:'the shop',spread:6},
+  pub:{x:371,in:1,label:"Lally's"},pubdoor:{x:379,label:"Lally's",spread:11},gardadoor:{x:230,label:'the barracks'},pubbench:{x:391,label:"the bench outside Lally's",sit:1,spread:3},
+  pump:{x:449,label:'the pump',spread:3},bench:{x:469,label:'the bench in the square',sit:1,spread:4},play:{x:482,label:'the square',play:1,spread:8},
+  busstop:{x:508,label:'the bus stop',spread:4},
+  grill:{x:570,in:1,label:'the Rio Grill'},grilldoor:{x:575,label:'the Rio Grill'},
+  savant:{x:618,in:1,label:"the Savant's"},
+  terA:{x:655,in:1,label:"Miss Cahill's"},terB:{x:711,in:1,label:"Glynn's"},
+  school:{x:777,in:1,label:'the school'},schoolgate:{x:800,label:'the school gate',spread:3},
+  yard:{x:832,label:'the school yard',layer:1,play:1,y:134,spread:4},yardduty:{x:821,label:'the school yard'},
+  garage:{x:868,in:1,label:'the garage'},forecourt:{x:892,label:'the garage',spread:3},
+  pitchwall:{x:962,label:'the pitch',spread:20},pitchin:{x:965,label:'the pitch',layer:1,far:1,play:1,spread:20},
+  fieldgate:{x:1030,label:"Regan's field"},field:{x:1030,label:"Regan's field",layer:1,far:1},
+  eastend:{x:18,label:'the Gort road'},westend:{x:1076,label:'the Kinvara road'},
+  offE:{x:-44,in:1,label:'the Gort road'},offW:{x:W+44,in:1,label:'the Kinvara road'},away:{x:0,in:1,away:1,label:'away'}
+};
+function placeX(v,key){const p=PL[key];return p.x+(p.spread?(hash(v.id,key)%(2*p.spread+1))-p.spread:0)}
 
-  /* lamps inside the cafes: a slow, small breathing glow */
-  var lamps = [[222,734,70],[330,738,60],[690,740,70],[815,738,70],[545,742,60],[1135,732,70],[1020,728,50],[1590,738,60]]
-    .map(function (l) { return { x: l[0], y: l[1], r: l[2], ph: rr(0, 6.28), sp: rr(0.25, 0.5) }; });
-  function drawLamps(t) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    lamps.forEach(function (l) {
-      var a = 0.05 + 0.03 * Math.sin(t * l.sp + l.ph);
-      var g = ctx.createRadialGradient(l.x, l.y, 2, l.x, l.y, l.r);
-      g.addColorStop(0, 'rgba(255,180,90,' + a + ')'); g.addColorStop(1, 'rgba(255,160,70,0)');
-      ctx.fillStyle = g; ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
-    });
-    ctx.restore();
-  }
+function pubHours(D){return{open:D.dow===0?t('12:30'):t('10:30'),close:(D.dow===5||D.dow===6)?t('00:30'):D.dow===0?t('23:00'):t('23:30')}}
+function shopHours(D){if(D.dow===0)return{open:t('09:00'),close:t('13:00'),lunch:null};return{open:t('08:30'),close:D.dow===6?t('17:00'):t('18:00'),lunch:D.dow===6?null:[t('13:00'),t('14:00')]}}
+function grillHours(D){if(D.dow===1)return null;const late=D.dow===5||D.dow===6,split=D.dow>=2&&D.dow<=5;return{o1:t('11:30'),c1:split?t('15:00'):null,o2:split?t('17:00'):null,close:late?t('01:30'):t('23:30')}}
+function schoolDay(D){return D.dow>=1&&D.dow<=5&&D.mo!==7&&D.mo!==8&&!(D.mo===12&&D.d>=22)&&!(D.mo===1&&D.d<=6)}
+function cowSeason(D){return D.mo>=3&&D.mo<=11}
+function matchDay(D){return D.dow===0&&D.mo>=2&&D.mo<=11&&Math.floor(D.pd/7)%2===0}
+function sessionTimes(D){if(D.dow!==3&&D.dow!==5&&D.dow!==6)return null;return{start:D.dow===3?t('21:00'):t('21:30'),end:pubHours(D).close}}
+function trainingTimes(D){if(D.dow===2||D.dow===4)return[t('18:30'),t('19:35')];if(D.dow===6)return[t('10:30'),t('11:30')];return null}
+function shopOpen(D,pm){const h=shopHours(D);return pm>=h.open&&pm<h.close&&!(h.lunch&&pm>=h.lunch[0]&&pm<h.lunch[1])}
+function pubOpen(D,pm){const h=pubHours(D);return pm>=h.open&&pm<h.close}
+function grillOpen(D,pm){const h=grillHours(D);if(!h||pm<h.o1||pm>=h.close)return false;return!(h.c1&&pm>=h.c1&&pm<h.o2)}
+function schoolIn(D,pm){return schoolDay(D)&&pm>=t('08:50')&&pm<t('15:00')}
+function garageOpen(D,pm){return D.dow>=1&&pm>=t('08:30')&&pm<(D.dow===6?t('13:00'):t('17:30'))}
 
-  /* ---------- everything below moves the painting's own paint, in thin slices ---------- */
-  function gustAt(t, k) { return 0.55 + 0.45 * Math.sin(t * 0.12 + k); }
+/* ---- the bus: six a day, two on Sunday, lateness decided in advance ---- */
+const BUS_WK=[['08:10',1],['10:15',-1],['12:20',1],['14:05',-1],['16:40',1],['18:25',-1]],BUS_SUN=[['12:20',1],['18:25',-1]];
+const BUS_V=46,BUS_WAIT=24;
+const _bus=new Map();
+function buses(pd){let v=_bus.get(pd);if(v)return v;const D=dinfo(pd);
+  v=(D.dow===0?BUS_SUN:BUS_WK).map(([s,dir])=>{const r=rng(hash('bus',pd,s)),u=r();let late;
+    if(u<0.10)late=0;else if(u<0.14)late=-1;else if(u<0.68)late=1+Math.floor(r()*6);else if(u<0.94)late=7+Math.floor(r()*17);else late=24+Math.floor(r()*22);
+    if(D.dow===0&&late>=0)late+=3;
+    return{id:s,sched:t(s),late,arr:t(s)+late+(late===0?0:r()*0.6),dir,dest:dir>0?'KINVARA':'GORT'}});
+  if(_bus.size>400)_bus.clear();_bus.set(pd,v);return v}
+function bus(pd,id){const s=id.length===4?id.slice(0,2)+':'+id.slice(2):id;return buses(pd).find(b=>b.id===s)}
+function busX(b,pm){const dt=(pm-b.arr)*60,sx=PL.busstop.x-10,V=BUS_V;let s;
+  if(dt<-3)s=V*(dt+1.5);else if(dt<0)s=-(V/6)*dt*dt;else if(dt<=BUS_WAIT)s=0;else{const d=dt-BUS_WAIT;s=d<3?(V/6)*d*d:V*(d-1.5)}
+  return sx+b.dir*s}
 
-  var garments = [[565,36],[601,37],[638,42],[680,36],[716,46],[762,43]].map(function (g) {
-    return { x: g[0], w: g[1], ph: rr(0, 6.28), sp: rr(0.7, 1.1) };
-  });
-  function drawWashing(t) {
-    var top = 512, bot = 594, step = 3, gust = gustAt(t, 0);
-    garments.forEach(function (g) {
-      var sway = (2.6 * Math.sin(t * g.sp + g.ph) + 1.1 * Math.sin(t * g.sp * 2.3 + g.ph)) * gust;
-      for (var y = top; y < bot; y += step) {
-        var f = (y - top) / (bot - top), prof = f < 0.72 ? f / 0.72 : (1 - f) / 0.28;
-        ctx.drawImage(scene, g.x, y, g.w, step, g.x + sway * prof, y, g.w, step);
-      }
-    });
-  }
+/* ---- Maureen Quinn's washing: out when dry, not always taken in, never left out of a Sunday night ---- */
+const _w=new Map();
+function washing(pd){let v=_w.get(pd);if(v)return v;const D=dinfo(pd),prev=D.dow===1?{outEnd:false,since:null}:washing(pd-1);
+  const r=rng(hash('wash',pd));let out=prev.outEnd,since=prev.since,hang=null,take=null;const u1=r(),u2=r(),u3=r(),u4=r();
+  if(!out){const ht=t('09:10')+Math.floor(u1*20);if(!rainPm(pd,ht)&&!rainPm(pd,ht-40)&&u2<0.92){hang=ht;out=true;since=pd}}
+  if(out){if(D.dow===0)take=Math.max(t('20:30'),(hang||0)+60);else if(u3<0.68)take=t('15:00')+Math.floor(u4*40)}
+  const outEnd=out&&take==null;
+  v={hang,take,outStart:prev.outEnd,outEnd,since:out?since:null};if(_w.size>400)_w.clear();_w.set(pd,v);return v}
+function washingAt(pd,pm){const w=washing(pd);let out=w.outStart;if(w.hang!=null&&pm>=w.hang+3)out=true;if(w.take!=null&&pm>=w.take+3)out=false;return{out,since:w.since,w}}
 
-  var awnings = [{ x: 0, w: 452, top: 682, edge: 713, bot: 727 }, { x: 908, w: 558, top: 686, edge: 716, bot: 730 }];
-  function drawAwnings(t) {
-    awnings.forEach(function (a, i) {
-      var cw = 6, gust = gustAt(t, 2 + i * 2), h1 = a.edge - a.top, h2 = a.bot - a.edge;
-      for (var x = a.x; x < a.x + a.w; x += cw) {
-        var d = (1.6 * Math.sin(x * 0.035 - t * 1.1 + i) + 0.9 * Math.sin(x * 0.011 + t * 0.6)) * gust;
-        ctx.drawImage(img, x, a.top, cw, h1, x, a.top, cw, h1 + d);
-        ctx.drawImage(img, x, a.edge, cw, h2, x, a.edge + d, cw, h2 - d);
-      }
-    });
-  }
+/* ---- the Sergeant's bicycle is not always where he left it ---- */
+const RACK=250;
+const GAG_SPOTS=[[322,'outside the post office'],[457,'against the pump'],[412,"outside Lally's"],[824,'at the school gate'],[842,'among the bicycles at the garage'],[486,'in the middle of the square'],[641,"against the Savant's wall"],[140,"at Maureen Quinn's door"]];
+function gag(pd){const r=rng(hash('gag',pd)),moved=r()<0.34,s=GAG_SPOTS[Math.floor(r()*GAG_SPOTS.length)];return{moved,x:s[0],where:s[1]}}
 
-  /* trees in pots and balcony plants: leaves shift a little, the edges of each patch stay put */
-  var plants = [
-    { x: 890, y: 722, w: 118, h: 88, amp: 2.2, k: 1 },   /* lemon tree */
-    { x: 1318, y: 722, w: 130, h: 92, amp: 2.2, k: 3 },  /* pink flowering tree */
-    { x: 4, y: 284, w: 170, h: 96, amp: 1.5, k: 5 },     /* geraniums, upper balcony */
-    { x: 270, y: 268, w: 160, h: 60, amp: 1.2, k: 6 },
-    { x: 4, y: 516, w: 190, h: 82, amp: 1.5, k: 7 },     /* lower balcony */
-    { x: 290, y: 518, w: 140, h: 50, amp: 1.2, k: 8 }
-  ].map(function (p) { p.ph = rr(0, 6.28); p.sp = rr(0.5, 0.8); return p; });
-  function drawPlants(t) {
-    plants.forEach(function (p) {
-      var gust = gustAt(t, p.k), step = 3;
-      for (var y = 0; y < p.h; y += step) {
-        var f = y / p.h, prof = Math.pow(Math.sin(Math.PI * f), 0.8);
-        var dx = p.amp * gust * prof * (Math.sin(t * p.sp + p.ph + f * 2.2) + 0.45 * Math.sin(t * p.sp * 2.7 + f * 7));
-        ctx.drawImage(p.y < 600 ? scene : img, p.x, p.y + y, p.w, step, p.x + dx, p.y + y, p.w, step);
-      }
-    });
-  }
+/* ---- the Savant: never seen; a light in the top window at hours of his own choosing ---- */
+function savantLight(pd){const r=rng(hash('sav',pd));if(r()<0.18)return null;const a=t('22:00')+Math.floor(r()*270),b=Math.min(1436,a+40+Math.floor(r()*260));return[a,b]}
+const THEORIES=[
+  'that Tuesday is a place, and that we pass through it',
+  'that the wind is caused by trees',
+  'that distance is only a habit, and can be given up',
+  'that rain does not fall. The parish rises to meet it',
+  'that the turlough goes to the same place the odd socks go',
+  'that a road has no length of its own, and borrows it from whoever is walking',
+  'that echoes are yesterday\'s conversations, arriving late',
+  'that a clock does not measure time. It provokes it',
+  'that every house is the same house, seen in a different mood',
+  'that hunger is a memory of the future',
+  'that the horizon is a rumour put about by people on hills',
+  'that nobody has ever arrived anywhere. They have only stopped leaving',
+  'that fog is the sky taking a closer look',
+  'that north is a matter of opinion, and south a matter of taste',
+  'that silence has a weight, and that Lally\'s floor was built to bear it'
+];
 
-  /* clouds: a copy of the painted clouds drifts slowly across the painted sky, hidden behind the roofs */
-  var SKY_H = 440, cloud = null, skyMask = null, skyTmp = null, skyBase = null;
-  function buildSky() {
-    try {
-      var src = document.createElement('canvas'); src.width = W; src.height = SKY_H;
-      var sx = src.getContext('2d'); sx.drawImage(img, 0, 0, W, SKY_H, 0, 0, W, SKY_H);
-      var d = sx.getImageData(0, 0, W, SKY_H), px = d.data;
-      var cl = sx.createImageData(W, SKY_H), mk = sx.createImageData(W, SKY_H);
-      for (var x = 0; x < W; x++) {
-        var open = true;
-        for (var y = 0; y < SKY_H; y++) {
-          var i = (y * W + x) * 4, r = px[i], g = px[i + 1], b = px[i + 2];
-          if (open && !(b > r + 6 && b > 60)) { if (y + 3 < SKY_H) { var j = ((y + 3) * W + x) * 4; if (!(px[j + 2] > px[j] + 6)) open = false; } else open = false; }
-          if (!open) break;
-          mk.data[i + 3] = 255;
-          var lum = (r + g + b) / 3, a = Math.max(0, Math.min(1, (lum - 105) / 60));
-          cl.data[i] = r; cl.data[i + 1] = g; cl.data[i + 2] = b; cl.data[i + 3] = Math.round(a * 215);
-        }
-      }
-      cloud = document.createElement('canvas'); cloud.width = W; cloud.height = SKY_H; cloud.getContext('2d').putImageData(cl, 0, 0);
-      var raw = document.createElement('canvas'); raw.width = W; raw.height = SKY_H; raw.getContext('2d').putImageData(mk, 0, 0);
-      /* pull the mask back from the rooflines so no cloud leaks onto a chimney */
-      skyMask = document.createElement('canvas'); skyMask.width = W; skyMask.height = SKY_H;
-      var mx = skyMask.getContext('2d'); mx.drawImage(raw, 0, 0);
-      mx.globalCompositeOperation = 'destination-in';
-      [[3, 0], [-3, 0], [0, -4], [2, -3], [-2, -3]].forEach(function (o) { mx.drawImage(raw, o[0], o[1]); });
-      skyTmp = document.createElement('canvas'); skyTmp.width = W; skyTmp.height = SKY_H;
-      /* a calm version of the sky, with the painted clouds smoothed away, for the moving clouds to cross */
-      var only = document.createElement('canvas'); only.width = W; only.height = SKY_H;
-      var ox = only.getContext('2d'); ox.drawImage(img, 0, 0, W, SKY_H, 0, 0, W, SKY_H);
-      ox.globalCompositeOperation = 'destination-in'; ox.drawImage(raw, 0, 0);
-      var small = document.createElement('canvas'); small.width = 90; small.height = 22;
-      var smx = small.getContext('2d'); smx.imageSmoothingEnabled = true;
-      smx.drawImage(only, 0, 0, 90, 22);
-      skyBase = document.createElement('canvas'); skyBase.width = W; skyBase.height = SKY_H;
-      var bx = skyBase.getContext('2d'); bx.imageSmoothingEnabled = true;
-      for (var k = 0; k < 4; k++) bx.drawImage(small, 0, 0, W, SKY_H);
-      bx.globalCompositeOperation = 'destination-in'; bx.drawImage(skyMask, 0, 0);
-    } catch (e) { cloud = null; }
-  }
-  function drawClouds(t) {
-    if (!cloud) return;
-    var dx = (t * 10) % W, tx = skyTmp.getContext('2d');
-    tx.globalCompositeOperation = 'source-over';
-    tx.clearRect(0, 0, W, SKY_H);
-    tx.globalAlpha = 0.72; tx.drawImage(skyBase, 0, 0); tx.globalAlpha = 1;
-    tx.drawImage(cloud, dx, 0); tx.drawImage(cloud, dx - W, 0);
-    tx.globalCompositeOperation = 'destination-in';
-    tx.drawImage(skyMask, 0, 0);
-    ctx.drawImage(skyTmp, 0, 0);
-  }
+/* ---- match scores for alternate Sundays ---- */
+const RIVALS=['Kilbeacanty','Beagh','Ardrahan','Kinvara','Craughwell','Tubber','Crusheen','Peterswell','Kiltartan'];
+function matchResult(pd){const r=rng(hash('match',pd)),opp=RIVALS[Math.floor(r()*RIVALS.length)];
+  const g1=Math.floor(r()*r()*4),p1=8+Math.floor(r()*13),g2=Math.floor(r()*r()*4),p2=8+Math.floor(r()*13);
+  const a=g1*3+p1,b=g2*3+p2;return{opp,us:g1+'-'+String(p1).padStart(2,'0'),them:g2+'-'+String(p2).padStart(2,'0'),a,b,res:a>b?'W':a<b?'L':'D'}}
+/* ================= people: who lives here and what they do all day ================= */
+function mkBuilder(v,pd){
+  const D=dinfo(pd),r=rng(hash('plan',v.id,pd));
+  const B={v,D,stops:[],t:0,at:v.home,x:placeX(v,v.home),start:v.home,wake:null,bed:null,r,
+    j:n=>Math.round((r()*2-1)*n),ri:n=>Math.floor(r()*n),
+    rainAt:pm=>rainPm(pd,pm),
+    begin(place){B.at=place;B.start=place;B.x=placeX(v,place);return B},
+    go(time,place,act,o){o=o||{};const key=typeof place==='number'?null:place,px=key?placeX(v,key):place;
+      const go=Math.max(time,B.t),sp=o.speed||(o.mode==='bike'?30:o.mode==='tractor'?26:v.speed);
+      const away=(B.at&&PL[B.at].away)||(key&&PL[key].away),dist=(o.tp||away)?0:Math.abs(px-B.x),tr=dist/sp/60;
+      B.stops.push({go,arr:go+tr,from:B.x,x:px,place:key,act,mode:o.mode||'walk',walk:o.walk,carry:o.carry,tag:o.tag,tp:dist===0,speed:sp});
+      B.t=go+tr;B.at=key;B.x=px;return B},
+    then(place,act,o){return B.go(B.t,place,act,o)},
+    act(time,act){return B.go(time,B.at!=null?B.at:B.x,act)},
+    tp(time,place,act){return B.go(time,place,act,{tp:true})},
+    wait(m){B.t+=m;return B}};
+  return B}
 
-  /* ---------- main loop ---------- */
-  var clock = 0, last = null, ready = false;
-  function frame(now) {
-    requestAnimationFrame(frame);
-    if (last === null) last = now;
-    if ((now - last) < 30 && SPEED === 1) return;
-    var dt = Math.min(0.1, (now - last) / 1000) * SPEED;
-    last = now; clock += dt;
-    if (!img.complete || !img.naturalWidth || !lit.complete || !lit.naturalWidth) return;
-    if (!ready) { ready = true; buildSky(); buildPatches(); }
-    stepRooms(dt); refreshScene();
-    ctx.clearRect(0, 0, W, H);
-    drawClouds(clock);
-    paintRooms(ctx);
-    drawPlants(clock);
-    drawWashing(clock);
-    drawAwnings(clock);
-    drawLamps(clock);
-    light.style.opacity = (0.1 + 0.1 * Math.sin(clock * 0.045)).toFixed(3);
+function chat(B){if(!B.rainAt(B.t)){B.then('shopfront','chatting outside the shop');B.wait(2+B.ri(4))}}
+function stroll(B,D,tm,home){if(sunTimes(D.pd).set>t('20:15')&&!B.rainAt(tm)&&!B.rainAt(tm+15)){const e=B.r()<0.5?'westend':'eastend';B.go(tm,e,'looking at the evening',{walk:'out for the evening walk'});B.wait(1);B.then('bench','sitting out the evening',{walk:'out for the evening walk'});B.wait(8+B.ri(10));B.then(home,'at home')}}
+function plan_maureen(B,D){
+  B.wake=t('07:30')+B.j(10);const w=washing(D.pd);
+  if(!B.rainAt(t('08:30'))){B.go(t('08:28')+B.j(8),127,'sweeping the step');B.wait(4);B.then('cottage','in the kitchen')}
+  if(w.hang!=null){B.go(w.hang,'line','hanging out the washing');B.wait(6);B.then('cottage','in the kitchen')}
+  B.go(t('10:30')+B.j(15),'shop','in the shop',{walk:'going for the messages'});B.wait(9+B.ri(8));chat(B);
+  if(!B.rainAt(B.t)&&B.r()<0.7){B.then('bench','sitting on the bench in the square');B.wait(15+B.ri(25))}
+  B.then('cottage','getting the dinner');
+  if(w.take!=null&&w.take<t('18:00')){B.go(w.take,'line','taking in the washing');B.wait(5);B.then('cottage','at home')}
+  {const dusk=sunTimes(D.pd).set-12;if(dusk>B.t+5){B.go(dusk,112,'putting in the hens');B.wait(3);B.then('cottage','at home')}}
+  if(w.take!=null&&w.take>=t('18:00')){B.go(w.take,'line','taking in the washing');B.wait(5);B.then('cottage','at home')}
+  if(D.dow===4&&B.r()<0.6){B.go(t('19:30')+B.j(10),'pub','visiting Bridie in Lally\'s');B.wait(50+B.ri(30));B.then('cottage','at home')}
+  else stroll(B,D,t('19:45')+B.j(15),'cottage');
+  B.bed=Math.max(t('22:15')+B.j(12),B.t+10)}
+
+function plan_tom(B,D){
+  B.wake=t('06:45');const G=gag(D.pd),pt={mode:'bike',walk:'on patrol'};
+  if(G.moved){B.go(t('07:40'),G.x,'looking at his bicycle',{walk:'going to retrieve his bicycle'});B.wait(1.5)}
+  B.go(t('08:00')+B.j(5),'westend','surveying the Kinvara road',pt);B.wait(2);
+  B.then('eastend','surveying the Gort road',pt);B.wait(2);
+  B.then('garda','at his desk',{mode:'bike',walk:'cycling back to the barracks'});
+  B.go(t('09:40')+B.j(10),'gardadoor','standing at the barracks door, surveying the street');B.wait(4+B.ri(3));B.then('garda','at his desk');
+  B.go(t('11:00')+B.j(20),'shop','buying the paper');B.wait(6);chat(B);B.then('garda','reading the paper at his desk');
+  if(D.dow===2||D.dow===4){B.go(t('13:00')+B.j(10),'grill','having his dinner at the Rio Grill');B.wait(25);B.then('garda','at his desk')}
+  B.go(t('15:00')+B.j(30),'eastend','watching the Gort road',pt);B.wait(1.5);
+  if(B.r()<0.5&&garageOpen(D,B.t+1)){B.then('forecourt','talking bicycles with Declan Forde',pt);B.wait(6)}
+  B.then('westend','watching the Kinvara road',pt);B.wait(1.5);
+  B.then('garda','at his desk',{mode:'bike',walk:'cycling back to the barracks'});
+  if(D.dow===6){B.go(t('18:20')+B.j(8),'grill','getting his tea at the Rio Grill');B.wait(8);B.then('garda','having his tea',{carry:'chips'})}
+  B.go(t('19:00')+B.j(20),'gardadoor','standing at the barracks door, looking at the evening');B.wait(4+B.ri(4));B.then('garda','in the day room');
+  const beat={speed:7,walk:'on the beat'};
+  B.go(t('20:10')+B.j(10),'westend','listening',beat);B.wait(1);B.then('garda','in the day room',beat);
+  B.go(t('21:45')+B.j(15),'eastend','listening',beat);B.wait(1);B.then('westend','listening',beat);B.wait(1);B.then('garda','in the day room',beat);
+  if(D.dow===5||D.dow===6){B.go(t('00:28'),'pubdoor','standing outside Lally\'s, looking at his watch');B.wait(22);B.then('garda','locking up');B.bed=B.t+8}
+  else B.bed=t('23:15')+B.j(10)}
+
+function plan_aoife(B,D){
+  B.begin('away');if(D.dow===0||D.dow===3)return;
+  const a=bus(D.pd,'0810'),l=bus(D.pd,'1825');
+  B.tp(a.arr+0.08,'busstop','getting off the bus');B.wait(0.3);B.then('garda','at the front desk',{walk:'walking to the barracks'});
+  const bt={speed:6,walk:'on the beat'};
+  B.go(t('10:00')+B.j(15),'westend','on the beat',bt);B.wait(1);B.then('eastend','on the beat',bt);B.wait(1);B.then('garda','writing it up',bt);
+  B.go(t('11:30')+B.j(10),'gardadoor','at the barracks door, watching the road');B.wait(5+B.ri(4));B.then('garda','at the front desk');
+  B.go(t('12:45')+B.j(10),'grill','having her lunch');B.wait(20);B.then('garda','at the front desk');
+  if(schoolDay(D)){B.go(t('14:54'),'schoolgate','seeing the children across');B.wait(16);B.then('garda','at the front desk')}
+  if(D.dow===2||D.dow===5){B.go(t('16:00')+B.j(10),'eastend','checking tax and insurance on the Gort road');B.wait(25);B.then('garda','writing it up')}
+  else{B.go(t('15:40')+B.j(10),'eastend','on the beat',bt);B.wait(1);B.then('garda','writing it up',bt)}
+  B.go(t('17:05')+B.j(8),'westend','on the beat',bt);B.wait(1);B.then('garda','signing out',bt);
+  B.go(t('18:12'),'busstop','waiting for the bus home');B.tp(l.arr+0.3,'away','gone home to Gort')}
+
+function plan_nuala(B,D){
+  B.wake=t('07:30');const h=shopHours(D);
+  B.go(h.open-2.5,'shopfront','putting out the papers');B.wait(2);B.then('shop','behind the counter');
+  const look=tm=>{if(tm>h.open+20&&tm<h.close-10&&!B.rainAt(tm)){B.go(tm,'shopfront','at the shop door, looking at the sky');B.wait(3+B.ri(3));B.then('shop','behind the counter')}};
+  look(t('10:05')+B.j(10));
+  if(h.lunch){B.act(h.lunch[0],'having her dinner, door locked');B.act(h.lunch[1],'behind the counter')}
+  look(t('16:10')+B.j(15));
+  B.act(h.close,'cashing up');B.act(h.close+20,'upstairs with the radio on');
+  if((D.dow===2||D.dow===4)&&!B.rainAt(h.close+30)){B.go(h.close+30+B.j(6),'pump','taking the air');B.wait(8);B.then('shop','upstairs with the radio on')}
+  if(D.dow!==2&&D.dow!==4&&D.dow!==5)stroll(B,D,t('19:30')+B.j(15),'shop');
+  if(D.dow===5&&B.r()<0.65){B.go(t('21:00')+B.j(15),'pub','in Lally\'s with a glass of stout');B.wait(100+B.ri(20));B.then('shop','at home')}
+  B.bed=Math.max(t('22:45')+B.j(10),B.t+12)}
+
+function plan_mossie(B,D){
+  const h=pubHours(D);B.wake=h.open-65;
+  B.go(h.open-4,'pubdoor','sweeping the front of the pub');B.wait(4);B.then('pub','behind the bar');
+  const arms=tm=>{if(tm>h.open+10&&tm<h.close-20&&!B.rainAt(tm)){B.go(tm,'pubdoor','standing at the pub door with his arms folded');B.wait(5+B.ri(6));B.then('pub','behind the bar')}};
+  if(D.dow===2){B.go(t('11:05')+B.j(8),'pubdoor','taking in the delivery');B.wait(10);B.then('pub','behind the bar')}
+  arms(t('12:10')+B.j(15));
+  if(D.dow!==0){B.go(t('15:00')+B.j(20),'shop','in the shop');B.wait(8);chat(B);B.then('pub','behind the bar')}
+  arms(t('17:00')+B.j(20));arms(t('20:00')+B.j(20));
+  B.act(h.close,'calling time');B.act(h.close+12,'clearing glasses');
+  B.go(h.close+22,'pubdoor','putting out the empties');B.wait(3);B.then('pub','locking up');B.bed=B.t+18}
+
+function plan_bridie(B,D){
+  B.wake=t('07:00');
+  if(D.dow===4){const o=bus(D.pd,'1015'),b=bus(D.pd,'1640');
+    B.go(t('10:01'),'busstop','waiting for the bus to Gort');B.tp(o.arr+0.3,'away','in Gort for the day');
+    B.tp(b.arr+0.08,'busstop','getting off the bus');B.wait(0.4);B.then('pub','by the fire in Lally\'s')}
+  else{
+    if(!B.rainAt(t('09:40')))B.go(t('09:30')+B.j(10),'pubbench','watching the road');
+    B.go(t('11:00')+B.j(10),'shop',D.dow===5?'collecting the pension':'in the shop');B.wait(12);
+    if(!B.rainAt(B.t)){B.then('bench','sitting in the square');B.wait(22+B.ri(15))}
+    B.then('pub','having her dinner');
+    if(!B.rainAt(t('15:30'))){B.go(t('15:30')+B.j(12),'pubbench','watching the road');B.go(Math.max(B.t+12,Math.min(t('17:15'),sunTimes(D.pd).set+12)),'pub','by the fire in Lally\'s')}
+    else B.act(t('15:30'),'by the fire in Lally\'s')}
+  B.bed=t('21:30')}
+
+function plan_luciana(B,D){
+  B.wake=t('07:45');const h=grillHours(D);
+  if(schoolDay(D)){B.go(t('08:38'),'grilldoor','seeing Rafa off to school');B.wait(3);B.then('grill','in the kitchen')}
+  if(D.dow===2||D.dow===5){B.go(t('09:15')+B.j(10),'shop','buying in');B.wait(10);chat(B);B.then('grill','doing the prep')}
+  if(!h){if(!B.rainAt(t('11:40'))){B.go(t('11:30')+B.j(10),'bench','sitting in the square on her day off');B.wait(30);B.then('grill','at home, day off')}B.bed=t('23:00');return}
+  const air=tm=>{if(grillOpen(D,tm)&&grillOpen(D,tm+8)&&!B.rainAt(tm)){B.go(tm,'grilldoor','taking a breath at the door');B.wait(4+B.ri(3));B.then('grill','at the grill')}};
+  B.act(h.o1,'at the grill');air(t('14:10')+B.j(10));if(h.c1){B.act(h.c1,'closed for the afternoon');B.act(h.o2,'at the grill')}
+  air(t('21:00')+B.j(30));
+  B.act(h.close,'scrubbing down the grill');B.bed=h.close+32}
+
+function plan_kid(B,D,v){
+  B.wake=t('07:40')+B.j(8);const k=v.k;
+  if(schoolDay(D)){
+    B.go(t('08:36')+k*1.5,'yard','in the yard before the bell',{walk:'walking to school'});B.go(t('08:50')+k*0.1,'school','in class');
+    B.go(t('10:30')+k*0.1,'yard','in the yard at small break',{speed:17,walk:'running out to the yard'});B.go(t('10:45'),'school','in class');
+    B.go(t('12:30')+k*0.1,'yard','in the yard at big break',{speed:17,walk:'running out to the yard'});B.go(t('13:00'),'school','in class');
+    const out=t('15:00')+k*0.35;
+    if(!B.rainAt(out)){B.go(out,'play','playing in the square',{speed:17,walk:'running to the square'});B.go(t('16:50')+B.j(8),v.home,'doing the homework',{walk:'going home'})}
+    else B.go(out,v.home,'doing the homework',{walk:'walking home in the rain'})}
+  else if(D.dow===6){
+    B.go(t('10:20')+k,'pitchin','at hurling training',{walk:'going to training',carry:'hurl'});B.go(t('11:32')+k*0.3,v.home,'at home',{carry:'hurl'});
+    if(!B.rainAt(t('14:10'))){B.go(t('14:00')+B.j(15),'play','playing in the square',{speed:17});B.go(t('16:30')+B.j(15),v.home,'at home')}}
+  else{
+    if(!B.rainAt(t('11:40'))){B.go(t('11:30')+B.j(15),'play','playing in the square',{speed:17});B.go(t('12:55'),v.home,'having the dinner')}
+    if(matchDay(D)){B.go(t('13:45')+k,'pitchwall','watching the match');B.go(t('15:32'),v.home,'at home')}}
+  if(D.dow===2||D.dow===4){B.go(t('18:22')+k,'pitchin','at hurling training',{walk:'going to training',carry:'hurl'});B.go(t('19:36')+k*0.3,v.home,'at home',{carry:'hurl'})}
+  B.bed=Math.max(v.id==='saoirse'?t('20:30'):t('21:00'),B.t+15)}
+
+function plan_niamh(B,D){
+  B.wake=t('07:00');
+  if(schoolDay(D)){
+    B.go(t('08:20')+B.j(4),'school','teaching');
+    B.go(t('10:30'),'yardduty','minding the yard');B.go(t('10:45'),'school','teaching');
+    B.go(t('12:30'),'yardduty','minding the yard');B.go(t('13:00'),'school','teaching');
+    B.act(t('15:00'),'correcting copies');
+    B.go(t('15:25')+B.j(8),'shop','in the shop');B.wait(8);chat(B);B.then('terA','at home');
+    if(D.dow===4){B.go(t('18:30')+B.j(10),'grill','getting chips for the tea');B.wait(6);B.then('terA','at home',{carry:'chips'})}
+    if(D.dow===1||D.dow===2)stroll(B,D,t('20:00')+B.j(10),'terA');
+    if(D.dow===3&&!B.rainAt(t('19:30'))){B.go(t('19:30'),'westend','out for a walk',{walk:'out for a walk'});B.wait(1);B.then('terA','at home',{walk:'out for a walk'})}
+    if(D.dow===5){B.go(t('21:15')+B.j(8),'pub','at the session in Lally\'s');B.go(t('23:30')+B.j(12),'pubdoor',"outside Lally's, not going home yet");B.wait(2+B.ri(7));B.then('terA','at home');B.bed=B.t+18;return}
+    B.bed=t('22:30')+B.j(8)}
+  else{
+    B.go(t('11:00')+B.j(20),'shop','in the shop');B.wait(10);
+    if(!B.rainAt(B.t)){B.then('bench','reading on the bench');B.wait(30)}
+    B.then('terA','at home');
+    if(matchDay(D)){B.go(t('13:40'),'pitchwall','watching the match');B.go(t('15:35'),'terA','at home')}
+    if(D.dow===6){B.go(t('21:35')+B.j(8),'pub','at the session in Lally\'s');B.go(pubHours(D).close-4+B.ri(8),'pubdoor',"outside Lally's, not going home yet");B.wait(2+B.ri(7));B.then('terA','at home');B.bed=B.t+18;return}
+    B.bed=t('23:00')}}
+
+const ROUND=[[229,'the barracks'],[128,"Quinn's"],[66,"Regan's"],[375,"Lally's"],[566,'the Rio Grill'],[622,"the Savant's step"],[659,"Miss Cahill's"],[781,'the school'],[872,'the garage']];
+function plan_paddy(B,D){
+  B.wake=t('06:00');const ses=sessionTimes(D);
+  if(D.dow!==0){
+    B.go(t('06:45'),'shop','sorting the post');B.wait(1);B.t=Math.max(B.t,t('07:30')+B.j(4));
+    for(const p of ROUND){B.then(p[0],'delivering to '+p[1],{walk:'on his round',carry:'bag'});B.wait(0.5+B.r()*1.3)}
+    B.then('offW','out on the country round',{walk:'heading out on the country round',carry:'bag'});
+    B.go(t('12:20')+B.j(15),'terB','having his dinner',{walk:'back from the round',carry:'bag'});
+    B.go(t('14:00'),'shop','in the back of the post office');B.go(t('15:00'),'terB','at home')}
+  else{B.go(t('11:20')+B.j(10),'shop','getting the paper');B.wait(5);if(!B.rainAt(B.t)){B.then('bench','reading the paper on the bench');B.wait(15+B.ri(10))}B.then('terB','at home')}
+  if(D.dow===2||D.dow===4){B.go(t('18:21'),'pitchwall','watching the training');B.go(t('19:37'),'terB','at home')}
+  if(D.dow===3||D.dow===5){B.go(t('18:05')+B.j(10),'grill','getting chips for the tea');B.wait(6);B.then('terB','at home',{carry:'chips'})}
+  if(matchDay(D)){B.go(t('13:42'),'pitchwall','watching the match');B.go(t('15:33'),'terB','at home')}
+  if(ses){B.go(ses.start-10+B.j(4),'pub','playing the fiddle in Lally\'s',{carry:'case',walk:'heading to the session'});B.go(ses.end+5+B.ri(4),'pubdoor',"outside Lally's, not going home yet",{carry:'case'});B.wait(2+B.ri(6));B.then('terB','at home',{carry:'case'});B.bed=B.t+22}
+  else B.bed=t('22:45')}
+
+function plan_declan(B,D){
+  B.wake=t('07:30');const open=D.dow>=1,close=D.dow===6?t('13:00'):t('17:30');
+  if(open){
+    B.go(t('08:27'),'forecourt','opening up');B.wait(3);B.then('garage','under a car');
+    const tea=tm=>{if(tm<close-10&&!B.rainAt(tm)){B.go(tm,'forecourt','drinking tea on the forecourt');B.wait(7+B.ri(5));B.then('garage','under a car')}};
+    B.go(t('10:45')+B.j(10),'shop','buying a bun and the paper');B.wait(6);chat(B);B.then('garage','under a car');
+    tea(t('11:35')+B.j(8));
+    if(D.dow>=2&&D.dow<=5){B.go(t('13:00')+B.j(8),'grill','having his dinner');B.wait(22);B.then('garage','looking for the 10 mm socket')}
+    tea(t('15:40')+B.j(10));
+    B.act(close,'closed, kettle on')}
+  else{B.go(t('10:50')+B.j(10),'shop','buying the paper and a bun');B.wait(6);if(!B.rainAt(B.t)){B.then('forecourt','reading the paper on an upturned crate');B.wait(18+B.ri(10))}B.then('garage','at home')}
+  if(D.dow===2||D.dow===4){B.go(t('18:15'),'pitchwall','training the under-12s');B.go(t('19:38'),'garage','at home')}
+  if(matchDay(D)){B.go(t('13:20'),'pitchwall','on the line at the match');B.go(t('15:34'),'pub','going over the match in Lally\'s');B.go(t('18:30')+B.j(20),'garage','at home')}
+  if(D.dow===1||D.dow===3||D.dow===5||D.dow===6){const c=pubHours(D).close;
+    B.go(t('20:30')+B.j(15),'pub','at the bar in Lally\'s');{const air=B.t+30+B.ri(40);if(air<pubHours(D).close-25){B.go(air,'pubdoor',"getting some air outside Lally's");B.wait(3+B.ri(3));B.then('pub','back at the bar')}}
+    B.go(c+3+B.ri(4),'pubdoor',"outside Lally's, not going home yet");B.wait(2+B.ri(6));
+    if(D.dow>=5&&grillOpen(D,c+16)){B.then('grill','waiting on a bag of chips');B.wait(6);B.then('garage','at home',{carry:'chips',walk:'walking home with a bag of chips'})}
+    else B.then('garage','at home');
+    B.bed=B.t+18}
+  else B.bed=Math.max(t('23:00'),B.t+10)}
+
+function plan_jimmy(B,D){
+  B.wake=t('06:15');const cs=cowSeason(D);
+  const fetch=tm=>{B.go(tm,'fieldgate','opening the gate',{walk:'going for the cows'});B.wait(0.8);
+    B.then('farmgate','closing the yard gate',{speed:8,walk:'bringing in the cows',tag:'in'});B.wait(0.3);B.then('farm','milking')};
+  const back=tm=>{B.go(tm,'fieldgate','closing the field gate',{speed:8,walk:'walking the cows back to the field',tag:'out'});B.wait(0.8);B.then('farm','in the yard',{walk:'walking home'})};
+  if(cs){fetch(t('07:20')+B.j(8));back(t('08:40')+B.j(5))}else{B.act(t('07:30'),'foddering the cows');B.act(t('08:20'),'having the breakfast')}
+  if(D.dow===0){B.go(t('10:10')+B.j(10),'shop','getting the paper');B.wait(6);chat(B);if(!B.rainAt(B.t)){B.then('bench','reading the paper in the square');B.wait(15+B.ri(12))}B.then('farm','having the dinner')}
+  if(D.dow!==0){const out=t('10:00')+B.j(25),mart=D.dow===4;
+    B.go(out,mart?'offE':'offW',mart?'at the mart in Gort':'at the co-op',{mode:'tractor',walk:mart?'driving to the mart':'driving to the co-op'});
+    B.go(out+55+B.ri(50),'farm','having the dinner',{mode:'tractor',walk:'driving home'})}
+  if(!B.rainAt(t('14:05'))){B.go(t('14:00')+B.j(15),'farmgate','leaning on the gate');B.wait(25+B.ri(20));B.then('farm','in the yard')}
+  if(cs){fetch(t('16:40')+B.j(6));back(t('18:00')+B.j(5))}else B.act(t('17:00'),'foddering the cows');
+  if(D.dow===2||D.dow===4||D.dow===6||D.dow===0){B.go(t('21:00')+B.j(15),'pub','having a pint in Lally\'s');{const air=B.t+30+B.ri(40);if(air<pubHours(D).close-25){B.go(air,'pubdoor',"getting some air outside Lally's");B.wait(3+B.ri(3));B.then('pub','back at the bar')}}B.go(Math.min(t('23:08')+B.j(8),pubHours(D).close+5),'pubdoor',"looking at the sky outside Lally's");B.wait(1+B.ri(3));B.then('farm','at home');B.bed=B.t+15}
+  else B.bed=t('22:00')}
+
+function plan_dog(B,D){
+  const J=getPlan(VBY.jimmy,D.pd),evs=[];
+  for(const s of J.stops){if(s.mode==='tractor')continue;let place=s.place,x=null,act='with Jimmy';
+    if(place==='farm'){place='farmgate';act='lying at the farm gate'}
+    else if(place&&PL[place].in){x=PL[place].x+9;act='waiting outside '+PL[place].label;place=null}
+    else if(place){x=PL[place].x+9;place=null}
+    evs.push([s.go+0.04,place,x,act,s.speed<9?s.speed:17])}
+  const C=getPlan(VBY.cian,D.pd);
+  for(let i=0;i<C.stops.length;i++){const s=C.stops[i];if(s.place==='play'){const end=C.stops[i+1]?C.stops[i+1].go:s.arr+60;
+    evs.push([s.arr+1,'play',null,'playing with the children',17]);evs.push([Math.min(end,t('16:28')),'farmgate',null,'lying at the farm gate',17])}}
+  evs.sort((a,b)=>a[0]-b[0]);
+  for(const e of evs)B.go(e[0],e[1]!=null?e[1]:e[2],e[3],{speed:e[4],walk:e[3]==='with Jimmy'?'trotting after Jimmy':'trotting along'})}
+
+function plan_cow(B,D,v){
+  if(!cowSeason(D)){B.begin('farm');return}
+  const J=getPlan(VBY.jimmy,D.pd);
+  for(const s of J.stops){if(s.tag==='in')B.go(s.go-0.45+v.k*0.07,'farm','being milked',{walk:'going in for milking'});
+    else if(s.tag==='out')B.go(s.go-0.45+v.k*0.07,'field','grazing',{walk:'going back to the field'})}}
+
+const SK=['#f0c8a8','#e8b894','#c98f62','#f3d2b8'];
+const V=[
+  {id:'maureen',name:'Maureen Quinn',role:'Keeps hens, and an eye on things.',home:'cottage',speed:9,plan:plan_maureen,
+    pal:{skin:SK[0],hair:'#bdb7ae',top:'#8a4f7a',arm:'#743f66',leg:'#6b5a50',shoe:'#2a2422'},st:{bun:1,skirt:'#3d4a63',umb:'#c0392b'},
+    lines:["That washing will dry yet.","I'm only going for the messages.","The hens are laying. Don't ask how many.","I don't leave it out of a Sunday night. I've standards."]},
+  {id:'tom',name:'Sgt. Tom Linnane',role:'The Sergeant. Thirty-one years in the barracks.',home:'garda',speed:9.5,plan:plan_tom,
+    pal:{skin:SK[1],hair:'#8f8f8f',top:'#1f2a44',arm:'#182036',leg:'#1a2238',shoe:'#0f0f12'},st:{hat:'garda',tash:1},
+    lines:["Would this be a bicycle matter?","What's next?","Nothing to report. I have it reported.","I know every bicycle in this parish. Some of them know me.","I left it at the barracks. I am certain of that much."]},
+  {id:'aoife',name:'Garda Aoife Burke',role:'In from Gort on the 08:10. Off Wednesdays and Sundays.',home:'away',speed:11,plan:plan_aoife,
+    pal:{skin:SK[0],hair:'#a8502a',top:'#d8dc2a',arm:'#b9bd1c',leg:'#1a2238',shoe:'#0f0f12'},st:{hat:'garda',pony:1},
+    lines:["I was on the camogie team once. Then I took a sliotar to the knee.","Tax, insurance, NCT. In that order.","Quiet. Too quiet. No, just quiet.","The Sergeant says the bicycle moves. I say nothing."]},
+  {id:'nuala',name:"Nuala O'Shaughnessy",role:'Shop and post office. Closed for dinner from one to two.',home:'shop',speed:9.5,plan:plan_nuala,
+    pal:{skin:SK[0],hair:'#5a3b2a',top:'#2e7d5b',arm:'#25684b',leg:'#4a4a52',shoe:'#1c1c20'},st:{skirt:'#2e7d5b',umb:'#2e7d5b'},
+    lines:["The post office clock is right. It's the rest of the country that's out.","We've no avocados. We had one in March.","I'll put it on the slate, so.","There were O'Shaughnessys here before there was a here."]},
+  {id:'mossie',name:'Mossie Lally',role:"Publican. Lally's has been Lally's since 1887.",home:'pub',speed:9.5,plan:plan_mossie,
+    pal:{skin:SK[1],hair:'#6a6058',top:'#3a2f2a',arm:'#e8e4da',leg:'#22201f',shoe:'#0f0f12'},st:{bald:1},
+    lines:["Ah, here we go again.","It's not a cocktail sort of a house.","A pint takes as long as it takes.","Time, please. I said it nicely the first time."]},
+  {id:'bridie',name:'Bridie Lally',role:"Mossie's mother. Eighty-six. Forecasts the weather, afterwards.",home:'pub',speed:5.5,plan:plan_bridie,
+    pal:{skin:SK[3],hair:'#b03a48',top:'#5a6b4a',arm:'#4c5b3e',leg:'#5a5048',shoe:'#1c1c20'},st:{hat:'scarf',coat:1,stick:1},
+    lines:["That's rain coming.","I knew your people.","You're back, so.","It's not the cold, it's the damp.","I said it would do that."]},
+  {id:'luciana',name:'Luciana Souza',role:'Runs the Rio Grill. Closed Mondays.',home:'grill',speed:11,plan:plan_luciana,
+    pal:{skin:SK[2],hair:'#1d1512',top:'#f2c230',arm:'#d9aa1c',leg:'#2a3a5a',shoe:'#1c1c20'},st:{long:1,apron:'#1f8a4c',umb:'#f2c230'},
+    lines:["Corner!","Heard. Two curry chips.","Every second counts, and the fryer isn't even hot.","In Anápolis it's thirty degrees. I'm told.","Pão de queijo on Fridays. They're gone by noon."]},
+  {id:'rafa',name:'Rafa Souza',role:"Nine. Luciana's son. Plays up front.",home:'grill',speed:12.5,plan:plan_kid,k:0,kid:1,
+    pal:{skin:SK[2],hair:'#1d1512',top:'#f2c230',arm:'#d9aa1c',leg:'#2a4fa0',shoe:'#e8e4da'},st:{bagc:'#c0392b'},
+    lines:["Yes, chef.","I'm centre forward. In hurling and football.","Watch this. No, wait. Watch this."]},
+  {id:'niamh',name:'Niamh Cahill',role:'The schoolteacher. Miss Cahill to most.',home:'terA',speed:11,plan:plan_niamh,
+    pal:{skin:SK[0],hair:'#d9b36a',top:'#2a8a8a',arm:'#207272',leg:'#2b2b35',shoe:'#1c1c20'},st:{long:1,coat:1,umb:'#f2c230'},
+    lines:["Fifty-nine swans. I counted them twice.","They're good children. Loud, but good.","That's the Plough, and that's Orion, and that one's an aeroplane.","There are more field names than fields. It's on the test."]},
+  {id:'paddy',name:'Paddy Glynn',role:'The postman. Plays the fiddle in Lally\'s.',home:'terB',speed:11.5,plan:plan_paddy,
+    pal:{skin:SK[1],hair:'#3a2a20',top:'#0b6b46',arm:'#095a3b',leg:'#22262e',shoe:'#0f0f12'},st:{band:'#d8dc2a'},
+    lines:["Nothing for you today. I checked.","That's not quite the tempo.","I don't read the postcards. I skim them.","There's a parcel for the Savant every Tuesday. Books, by the weight."]},
+  {id:'cian',name:'Cian Glynn',role:'Ten. On the under-12s.',home:'terB',speed:12.5,plan:plan_kid,k:1,kid:1,
+    pal:{skin:SK[0],hair:'#6a4428',top:'#7b1e3a',arm:'#641730',leg:'#e8e4da',shoe:'#22262e'},st:{bagc:'#2a4fa0'},
+    lines:["I'm on the under-12s. I'm ten.","Bran can do a trick. He's not doing it now.","I found the sliotar from the 2019 final. It was in the hedge the whole time."]},
+  {id:'saoirse',name:'Saoirse Glynn',role:'Seven and a half.',home:'terB',speed:12,plan:plan_kid,k:2,kid:1,
+    pal:{skin:SK[0],hair:'#8a5a30',top:'#e07a9a',arm:'#c9647f',leg:'#5a4a6a',shoe:'#22262e'},st:{pig:1,skirt:'#b0527a',bagc:'#f2c230'},
+    lines:["I'm seven and a half.","The Savant has a cat and the cat has opinions.","I counted the swans. There were fifty-nine. Miss said count again."]},
+  {id:'declan',name:'Declan Forde',role:'Forde Motors. Motors and cycles.',home:'garage',speed:10.5,plan:plan_declan,
+    pal:{skin:SK[1],hair:'#1d1512',top:'#3566a8',arm:'#2c558c',leg:'#3566a8',shoe:'#1c1c20'},st:{hat:'cap',hatc:'#b03030'},
+    lines:["It's the alternator.","I could have it for you Thursday. A Thursday.","A bicycle is a serious machine. Ask the Sergeant.","The 10 mm socket is gone again. It goes where the turlough goes."]},
+  {id:'jimmy',name:'Jimmy Regan',role:'Farmer. Six cows and a collie.',home:'farm',speed:9.5,plan:plan_jimmy,
+    pal:{skin:SK[1],hair:'#9a958c',top:'#4a5a3a',arm:'#3e4c30',leg:'#5a4a36',shoe:'#161616'},st:{hat:'flat',hatc:'#6b6a55',stick:1,wellies:1},
+    lines:["They've the right of way. They know it, too.","I'd say it'll hold off.","The tractor? No Hurry Whatsoever. That's her name.","I'm not leaning on the gate. I'm minding it."]}
+];
+const COWS=[0,1,2,3,4,5].map(k=>({id:'cow'+k,name:"One of Regan's",role:'She has the right of way.',home:'field',speed:8+((hash('cs',k)%7)-3)*0.05,plan:plan_cow,k,sprite:'cow',animal:1,
+  lines:["(She has the right of way and knows it.)","(She stopped to think. She is still thinking.)","(She is looking at you without urgency.)"]}));
+const DOG={id:'bran',name:'Bran',role:"Jimmy Regan's collie. Attends school when he can.",home:'farmgate',speed:17,plan:plan_dog,sprite:'dog',animal:1,
+  lines:["(He is thinking about the cows.)","(He knows a trick. He is not doing it now.)","(He has counted you.)"]};
+const VBY={};for(const v of V)VBY[v.id]=v;VBY.bran=DOG;
+
+/* ---- visitors: musicians and others who come in for the night, summer strangers, the fox ---- */
+const XPAL=[['#6a3a2a','#7a8a5a','#3a3a44'],['#2a2a2a','#a85a3a','#2b3550'],['#c9a96a','#4a6a8a','#3a3028'],['#5a3b2a','#8a3a4a','#2a2a30'],['#8f8f8f','#3a5a4a','#4a4038'],['#3a2a20','#b88a3a','#2b2b35']];
+const PUNTERS=[['A man from Kinvara','In for the one. He has had the one.'],['A woman from Crusheen','Here for the music.'],['A Peterswell man','Says little. Nods in time.'],['A man from Beagh','He knows a man who knows the tune.'],['A Tubber woman','Drove over. Parked badly.']];
+const XLINES=["Just in for the one.","Is there a session? There is.","Grand little spot.","I'm only passing through. Since Friday."];
+const _ex=new Map();
+function extras(pd){let v=_ex.get(pd);if(v)return v;const D=dinfo(pd),r=rng(hash('extras',pd)),list=[],ses=sessionTimes(D);
+  const mk=(id,name,role,from,fn,o)=>{const c=XPAL[Math.floor(r()*XPAL.length)];
+    list.push(Object.assign({id:'x'+id,name,role,home:from,speed:9+r()*2.5,plan:fn,extra:1,lines:XLINES,
+      pal:{skin:SK[Math.floor(r()*SK.length)],hair:c[0],top:c[1],arm:c[1],leg:c[2],shoe:'#161616'},st:{hat:r()<0.3?'flat':null,hatc:'#55524a',long:r()<0.3}},o||{}))};
+  if(ses){
+    mk('flute','The flute player','In from Tubber for the session.','offW',B=>{B.begin('offW');B.go(ses.start-14+B.j(5),'pub','playing the flute in Lally\'s',{carry:'case',walk:'heading to the session'});B.go(ses.end+3+B.ri(5),'pubdoor',"outside Lally's, not going home yet",{carry:'case'});B.wait(2+B.ri(7));B.then('offW','gone home',{carry:'case',walk:'heading for home'})});
+    if(D.dow!==3)mk('box','The box player','In from Ardrahan with the accordion.','offE',B=>{B.begin('offE');B.go(ses.start-9+B.j(5),'pub','playing the box in Lally\'s',{carry:'case',walk:'heading to the session'});B.go(ses.end+4+B.ri(5),'pubdoor',"outside Lally's, not going home yet",{carry:'case'});B.wait(2+B.ri(7));B.then('offE','gone home',{carry:'case',walk:'heading for home'})});
+    const n=D.dow===6?4:D.dow===5?3:1;
+    for(let i=0;i<n;i++){const p=PUNTERS[(Math.floor(r()*5)+i)%PUNTERS.length],from=r()<0.5?'offE':'offW',chips=D.dow>=5&&r()<0.55;
+      mk('p'+i,p[0],p[1],from,B=>{B.begin(from);B.go(t('20:40')+B.ri(75),'pub','in Lally\'s for the session');{const D=B.D;const air=B.t+30+B.ri(40);if(air<pubHours(D).close-25){B.go(air,'pubdoor',"getting some air outside Lally's");B.wait(3+B.ri(3));B.then('pub','back at the bar')}}
+        B.go(ses.end+1+B.ri(7),'pubdoor',"outside Lally's, not going home yet");B.wait(3+B.ri(8));
+        if(chips){B.then('grill','waiting on chips');B.wait(5+B.ri(4));B.then(from,'gone home',{carry:'chips',walk:'heading home with chips'})}
+        else B.then(from,'gone home',{walk:'heading for home'})})}}
+  if(D.mo>=5&&D.mo<=9&&r()<0.65){const st=t('11:00')+Math.floor(r()*240);
+    for(let i=0;i<2;i++)mk('v'+i,i?'Another visitor':'A visitor','Looking for the Cliffs of Moher. They are not here.','offE',B=>{B.begin('offE');B.go(st+i*0.07,438+i*7,'reading the noticeboard',{walk:'looking around'});B.wait(1.5);B.then('shop','asking directions in the shop');B.wait(5);B.then(451+i*7,'looking at the pump');B.wait(1);B.then('offW','gone, in the wrong direction',{walk:'following the directions'})},{lines:["Is this the way to the Cliffs of Moher?","We were told three ways.","It is very green. And quite wet."]})}
+  if(r()<0.72){const ft=t('01:50')+Math.floor(r()*70);
+    mk('fox','A fox','He did not hurry.','offW',B=>{B.begin('offW');B.go(ft,586,'at the bins behind the Rio Grill',{walk:'going down the middle of the street'});B.wait(1.6);B.then('offE','gone',{walk:'going down the middle of the street'})},{sprite:'fox',animal:1,speed:15,lines:["(He looked at you first.)","(He is the only one here who is never late.)"]})}
+  if(_ex.size>300)_ex.clear();_ex.set(pd,list);return list}
+function entities(pd){return V.concat(COWS,[DOG],extras(pd))}
+
+const _plans=new Map();
+function getPlan(v,pd){const k=v.id+'|'+pd;let P=_plans.get(k);if(P)return P;const B=mkBuilder(v,pd);v.plan(B,B.D,v);
+  P={stops:B.stops,wake:B.wake==null?t('07:30'):B.wake,bed:B.bed==null?t('22:30'):B.bed,start:B.start,startX:placeX(v,B.start)};P.sleep=P.bed+24;
+  if(_plans.size>1500)_plans.clear();_plans.set(k,P);return P}
+
+function stateOf(v,pd,pm){
+  const P=getPlan(v,pd),S=P.stops;let i=-1;for(let k=0;k<S.length;k++){if(S[k].go<=pm)i=k;else break}
+  let st;
+  if(i>=0&&!S[i].tp&&pm<S[i].arr){const s=S[i],f=(pm-s.go)/(s.arr-s.go),x=lerp(s.from,s.x,f);
+    const lab=s.place?(s.place===v.home?'home':PL[s.place].label):'';
+    st={x,moving:true,dir:s.x>=s.from?1:-1,mode:s.mode,act:s.walk||('walking '+(lab==='home'?'home':'to '+lab)),dist:Math.abs(x-s.from),carry:s.carry,hidden:false,place:null,from:s.from,to:s.x,toPlace:s.place,fromPlace:i>0?S[i-1].place:P.start}}
+  else{const place=i<0?P.start:S[i].place,pl=place?PL[place]:null,x=i<0?P.startX:S[i].x;
+    let act=i<0?(v.sprite==='cow'?(place==='farm'?'in for the winter':'grazing'):v.sprite==='dog'?'lying at the farm gate':'at home'):S[i].act;
+    st={x,moving:false,dir:1,mode:i<0?'walk':S[i].mode,act,carry:i<0?null:S[i].carry,hidden:!!(pl&&pl.in),place,layer:!!(pl&&pl.layer),far:!!(pl&&pl.far),sit:!!(pl&&pl.sit),play:!!(pl&&pl.play),since:i<0?0:S[i].arr}}
+  st.v=v;st.awake=pm>=P.wake&&pm<P.bed;st.bedding=pm>=P.bed&&pm<P.sleep;st.home=st.place===v.home&&st.hidden;
+  if(st.home&&!v.animal){if(pm>=P.sleep||pm<P.wake)st.act='asleep';else if(pm>=P.bed)st.act='going to bed'}
+  return st}
+/* ================= the parish log: what happened, whether or not anyone was looking ================= */
+const NUM=['no','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+/* [from hour, to hour, text, condition] hours on the 24h clock; past 24 means after midnight */
+const POOL=[
+  [8,11,'A heifer got as far as the square before anyone took notice.',(D)=>cowSeason(D)],
+  [9,12,"The post office clock and the clock in Lally's disagree by nine minutes. Both are considered correct."],
+  [8,9.5,'Paddy Glynn delivered a postcard to Maureen Quinn. He reports they are having a lovely time.',(D)=>D.dow!==0],
+  [9,10.4,'The dog Bran attended school until the small break.',(D)=>schoolDay(D)],
+  [9,12.5,"Declan Forde says it's the alternator. It is always the alternator.",(D)=>D.dow>=1],
+  [7,11,'A crow has learned to open the bin outside the Rio Grill. The other crows are watching closely.'],
+  [9,13,'Bridie Lally predicted rain. It was already raining.',(D,X,pm)=>X.rain(pm)],
+  [9,13,'Bridie Lally predicted rain. Nobody argued.',(D,X,pm)=>!X.rain(pm)],
+  [6.5,8,'Somebody left a salmon on the barracks windowsill. Enquiries are not being made.'],
+  [8,10,'A parcel of books came for the Savant. It was left on the step. It was gone before anyone looked twice.',(D)=>D.dow===2],
+  [9.2,9.6,"Nuala O'Shaughnessy sold the last newspaper at ten past nine. There were four."],
+  [11,12.4,"Miss Cahill's class learned the names of the fields. There are more names than fields.",(D)=>schoolDay(D)],
+  [11,15,"A hen walked into Lally's, looked around, and left."],
+  [8.3,8.6,'The Sergeant cycled to both ends of the parish and back. Nothing to report. He reported it.'],
+  [11,13,"Jimmy Regan's tractor came back from the co-op with a different sound.",(D)=>D.dow>=1&&D.dow!==4],
+  [10,11.5,'Luciana Souza put pão de queijo on the counter. Gone by noon.',(D)=>D.dow===5],
+  [10,16,'The pump in the square was tried. It works. Nobody has needed it since 1974.'],
+  [10,17,'A man from Kinvara was seen. No further details.'],
+  [9,16,'Declan Forde fixed the wrong car. The owner is delighted.',(D)=>D.dow>=1],
+  [11,16,'Two visitors asked the way to the Cliffs of Moher. They were given three ways.'],
+  [11,17,'A stranger asked was there Wi-Fi. He was told there is, on Thursdays.'],
+  [9,17,'The pothole outside the garage was measured. It has grown.'],
+  [19,21,'A motion to fill the pothole was carried. The pothole remains, and now has a name.'],
+  [9,14,'The noticeboard gained a notice about a lost glove. The glove is pinned beside it.'],
+  [8,10,"Maureen Quinn's hens are laying. She would rather you did not ask how many."],
+  [12.6,12.9,'Rafa Souza scored a point from the school gate. The school has no goalposts. It was given.',(D)=>schoolDay(D)],
+  [12,18,'Mossie Lally changed a barrel. He would like it noted.'],
+  [10.2,10.5,'Garda Burke gave directions to a lorry. It was not the lorry\'s fault.',(D)=>D.dow!==0&&D.dow!==3],
+  [15.2,15.6,'The Sergeant observed a bicycle leaning against the pump. He observed it for some time.'],
+  [12.5,13,'A sheep was found in the school yard at the big break. Lessons resumed at two.',(D)=>schoolDay(D)],
+  [10,16,'Bridie Lally says the weather is coming from the wrong direction.'],
+  [11,16,'A cyclist in full gear stopped for water and was told the history of the pump.',(D)=>D.mo>=4&&D.mo<=10],
+  [15,16,'The swans left the turlough at three and were back by four. No reason was given.',(D,X)=>X.tl>0.45],
+  [14.1,14.5,'Jimmy Regan leaned on the gate for the bones of an hour. Productive, he says.',(D,X,pm)=>!X.rain(pm)],
+  [11,15,'The mobile library called. One book out, one book back. The same book.',(D)=>D.dow===3],
+  [15.3,17,'Cian Glynn found a sliotar in the hedge. It is the one from the 2019 final.'],
+  [9,17,'Declan Forde sold a bicycle. The Sergeant was informed, as a courtesy.',(D)=>D.dow>=1],
+  [10,18,"The Savant's cat sat on the wall for four hours and conceded nothing."],
+  [11,16,'An American asked if his people came from here. They did. Everybody\'s did.',(D)=>D.mo>=5&&D.mo<=9],
+  [15.2,16.5,'Saoirse Glynn counted the swans on the turlough. Fifty-nine. Miss Cahill said to count again.',(D,X)=>X.tl>0.45],
+  [10,15,'A wasp got into the post office. Business was conducted outside for ten minutes.',(D)=>D.mo>=7&&D.mo<=9&&D.dow!==0],
+  [12,18,'First swallows over the square. Bridie Lally says it is too early. She says it every year.',(D)=>D.mo===4&&D.d>=8&&D.d<=20],
+  [6,9,'The cuckoo was heard on the Kinvara road. That is the summer, so.',(D)=>(D.mo===4&&D.d>=22)||(D.mo===5&&D.d<=10)],
+  [9,20,'Silage. The road is busy. Nobody is to speak to Jimmy Regan.',(D)=>D.mo===6&&D.d>=5&&D.d<=20],
+  [14,19,"Turf came home on a trailer. Maureen Quinn's is stacked. The stack was admired.",(D)=>D.mo===7||(D.mo===8&&D.d<15)],
+  [15.2,18,'Blackberries on the Gort road. The children are purple.',(D)=>D.mo===9],
+  [16,18.5,'The evenings are closing in. This was mentioned eleven times in the shop.',(D)=>D.mo===10||D.mo===11],
+  [16,18,'There is a stretch in the evenings. This was mentioned in the shop, the pub and the barracks.',(D)=>D.mo===2||D.mo===3],
+  [20,22.5,'Mossie Lally was asked for a cocktail. He is considering his position.'],
+  [21.5,23,"A man in Lally's sang twenty-three verses. He was thanked after the fourth."],
+  [19,22,'Power cut, seven minutes. Lally\'s did not notice.',(D)=>D.mo>=10||D.mo<=3],
+  [22,23.2,"Somebody played a slow air in Lally's and the whole place went quiet, even the fridge.",(D)=>!!sessionTimes(D)],
+  [22.5,23.3,'Two lads from Tubber missed the last bus. There is no last bus. There is only the 18:25.'],
+  [20.5,22.8,"A debate in Lally's on whether a bicycle can be said to want anything. Adjourned."],
+  [18.5,21,'The stars are out. Miss Cahill showed the children the Plough from her door.',(D,X,pm)=>X.clearNight(pm)],
+  [10,13,'The round tower was looked at. It leans no more than it did.'],
+  [12,17,'A lorry met the bus at the narrow part. They are still discussing it.',(D)=>D.dow!==0],
+  [9,12,'The turlough rose a foot overnight. It did not consult anyone.',(D,X)=>X.tl>0.5&&X.rain(120)],
+  [10,16,'The turlough is gone again. It left a heron and no forwarding address.',(D,X)=>X.tl<0.12],
+  [8.6,9,'A child arrived at school with one shoe. The other is being sought on the Kinvara road.',(D)=>schoolDay(D)],
+  [17.6,18.4,'The Angelus rang from somewhere. There is no church. Nobody has looked into it.'],
+  [13,14,"The post office closed for dinner at one and opened at two. A man waited outside in the rain and was told it was his own fault.",(D,X,pm)=>D.dow>=1&&D.dow<=5&&X.rain(pm)],
+  [20,23,"Jimmy Regan told the one about the bullock in Lally's. It has improved.",(D)=>D.dow===2||D.dow===4||D.dow===6||D.dow===0],
+  [9.5,12,"A hat blew from the square to the school. It is not known whose. It suits the railings.",(D,X,pm)=>X.wind(pm)>0.7],
+  [7,9,'Mist on the turlough. The far side of the square could not be confirmed.',(D,X)=>X.mist>0.3],
+  [11,15,'Forty-two sheep were counted going to the mart. The man counting fell asleep.',(D)=>D.dow===4]
+];
+const SPECIAL={101:[12,"New Year's Day. The parish is the same age as yesterday. The Savant disputes this."],
+  201:[9,"St Brigid's Day. First day of spring, officially. The weather has not been told."],
+  317:[12.2,"St Patrick's Day parade: Jimmy Regan's tractor, the school, and Bran. It lasted four minutes and was the best yet."],
+  525:[9.7,"A towel has appeared on Quinn's line. Somebody always knows where theirs is."],
+  621:[23.1,'The longest day. Light in the sky at eleven at night. Nobody went to bed, on principle.'],
+  803:[8.2,'Bunting in the square. Nobody will say who it is for.'],
+  1031:[20.5,"Halloween. A bonfire in Regan's field. The Sergeant attended in an unofficial capacity, with sausages."],
+  1208:[17,"The lights went up on Lally's. Three bulbs gone already. It is tradition."],
+  1221:[16.3,'The shortest day. Dark at four. The Savant is said to be delighted.'],
+  1225:[14,'Christmas Day. Nothing happened, and it was lovely.']};
+const _perm=new Map();
+function poolPerm(cyc){let p=_perm.get(cyc);if(p)return p;const r=rng(hash('perm',cyc));p=POOL.map((_,i)=>i);for(let i=p.length-1;i>0;i--){const j=Math.floor(r()*(i+1)),x=p[i];p[i]=p[j];p[j]=x}_perm.set(cyc,p);return p}
+
+const _ev=new Map();
+function dayEvents(pd){let ev=_ev.get(pd);if(ev)return ev;ev=[];
+  const D=dinfo(pd),r=rng(hash('ev',pd)),t0=pdayStart(pd);
+  const add=(pm,text,kind)=>{if(pm>=0&&pm<1440)ev.push({pm,text,kind:kind||''})};
+  const pick=a=>a[Math.floor(r()*a.length)];
+  const hm=h=>h*60-240;
+  /* buses */
+  for(const b of buses(pd)){const s=clock(b.sched),a=clock(b.arr);
+    if(b.late>=24)add(b.arr,'The '+s+' bus arrived at '+a+'. The driver offered no explanation and none was sought.');
+    else if(b.late>=7)add(b.arr,pick(['The '+s+' bus arrived at '+a+'.','The '+s+' bus arrived at '+a+'. Nobody was surprised, and one man was disappointed.','The '+s+' bus came at '+a+'. It is said to have been seen in Gort on time.']));
+    else if(b.late===0)add(b.arr,'The '+s+' bus arrived at '+s+'. Suspicion is widespread.');
+    else if(b.late<0)add(b.arr,'The '+s+' bus left a minute early. An inquiry is under way.');
+    else if(r()<0.18)add(b.arr,'The '+s+' bus was only '+(b.late===1?'a minute':NUM[b.late]+' minutes')+' late. It was remarked upon.')}
+  /* washing */
+  const w=washing(pd);
+  if(w.hang!=null)add(w.hang+6,pick(['Maureen Quinn put out the washing.',"Washing out at Quinn's. A statement of confidence."]));
+  if(w.outStart&&w.since!=null){const n=pd-w.since;add(t('08:55'),n<=1?"Quinn's washing spent the night out.":"Quinn's washing has been out "+(NUM[n]||n)+' days. It is becoming a landmark.')}
+  const oFrom=w.outStart?10:(w.hang!=null?w.hang+6:null),oTo=w.take!=null?w.take:1440;let rained=false;
+  if(oFrom!=null)for(let m=oFrom;m<oTo;m+=5)if(rainPm(pd,m)){if(!rained&&m>oFrom)add(m,pick(["Rain. Quinn's washing is still out.","It is raining on Maureen Quinn's washing. She is aware.","Rain. The washing at Quinn's is getting a second rinse."]));rained=true}
+  if(w.take!=null)add(w.take+5,D.dow===0&&w.take>=t('20:00')?'Maureen Quinn took in the washing. It is not left out of a Sunday night.':rained?'The washing was taken in, wetter than it went out.':'The washing was taken in, dry. Maureen Quinn was seen to nod.');
+  /* cows */
+  if(cowSeason(D)){const runs=getPlan(VBY.jimmy,pd).stops.filter(s=>s.tag);if(runs.length&&r()<0.6){const s=pick(runs);
+    add(s.go+1,s.tag==='in'?pick(["Jimmy Regan's cows came down the street. They had the right of way and took all of it.",'The cows went in for milking. One stopped at the post office and had to be reasoned with.','Cows on the road. Traffic stood back: one van, one hen.']):pick(['The cows went back to the field. The last one walked as if she had somewhere better to be.','Cows on the road again, going the other way, at their own pace.']))}}
+  else if(D.md===1201)add(t('09:00'),'The cows are in for the winter. They have views on this.');
+  /* the bicycle */
+  const G=gag(pd);if(G.moved)add(t('06:40'),"The Sergeant's bicycle was found "+G.where+'. It was left at the barracks last night. '+pick(['The Sergeant asks that nobody draw conclusions.','No statement.','The Sergeant looked at it for some time.','It is not the first time, and he has stopped writing it down.']));
+  /* weekly fixtures */
+  if(D.dow===4){const o=bus(pd,'1015'),b=bus(pd,'1640');add(o.arr+1,'Bridie Lally took the bus to Gort.');add(b.arr+2,'Bridie Lally came back from Gort with opinions.')}
+  if(D.dow===2)add(t('11:17'),"Delivery at Lally's. Mossie counted the barrels twice.");
+  if(D.dow===5)add(t('09:06'),'Pension day. The post office was busy from nine until five past.');
+  if(D.dow===1&&r()<0.5)add(t('12:40'),'The Rio Grill is closed Mondays. This is discovered weekly.');
+  if((D.dow===2||D.dow===5)&&D.dow!==3)add(t('16:27'),pick(['Garda Burke checked tax and insurance on the Gort road. Four cars, a tractor and a man on a horse. All in order bar the tractor.','Checkpoint on the Gort road. Jimmy Regan\'s tractor has no tax, and a calf in the cab. A caution was issued to the calf.','Garda Burke stopped nine cars on the Gort road. Seven knew her mother.']));
+  if(schoolDay(D)&&r()<0.25)add(t('15:01'),pick(['School let out. It was heard in Tubber.','School is out. The square has been taken.']));
+  const tr=trainingTimes(D);if(tr&&r()<0.35)add(tr[1]+3,pick(['Training finished at the pitch. Declan Forde says they are coming on.','Under-12s training. Nine hurleys went out and ten came back.']));
+  if(matchDay(D)){const m=matchResult(pd);
+    add(t('15:27'),'Full time at the pitch: Ballydeselby '+m.us+', '+m.opp+' '+m.them+'. '+(m.res==='W'?'There will be no talking to them.':m.res==='L'?'The wind is being blamed.':'A draw. Both sides are claiming it.'));
+    add(t('19:30'),m.res==='W'?"Lally's is loud.":m.res==='L'?"Lally's is quiet. The match is not being discussed, at length.":"Lally's cannot agree who drew better.")}
+  /* nights */
+  const ses=sessionTimes(D),ph=pubHours(D);
+  if(ses)add(ses.start+4,"Session in Lally's: Paddy Glynn on the fiddle, a flute from Tubber"+(D.dow===3?'':', a box from Ardrahan')+pick(['.','. And a man who only knows the one song.','. The first tune was the Kesh.']));
+  if(D.dow>=5||r()<0.45)add(ph.close+pick([3,6,9]),pick(["Time was called at Lally's. It was called again eleven minutes later.","Lally's closed. The street took a while to accept it.","Time at Lally's. Mossie said it nicely the first time."]));
+  if((D.dow===5||D.dow===6)&&r()<0.5)add(t('00:36'),"The Sergeant stood outside Lally's at closing, looking at his watch. Everyone agreed it was a fine watch.");
+  if((D.dow===5||D.dow===6)&&r()<0.3)add(t('01:10'),'The Rio Grill ran out of curry sauce at ten past one. There was nearly a meeting.');
+  const sl=savantLight(pd);if(sl&&r()<0.5)add(sl[0]+2,pick(["A light in the Savant's top window.","The Savant's lamp is lit. Nobody saw him light it.","A light at the top of the Savant's house. It went out when looked at, and came back."]));
+  if(r()<0.34)add(t('09:00')+Math.floor(r()*480),'A note from the Savant, left under the stone at the pump. He holds '+THEORIES[(pd*4)%THEORIES.length]+'. Nobody has seen him to ask.');
+  const fox=extras(pd).find(e=>e.sprite==='fox');if(fox&&r()<0.45)add(getPlan(fox,pd).stops[0].go+0.6,'A fox went down the middle of the street. He did not hurry.');
+  /* weather and sky */
+  const hrs=rainHours(pd,t('21:00'));
+  if(hrs<0.2){if(r()<0.6)add(t('21:00'),pick(['No rain today. People are uneasy.','A dry day. It will be paid for.']))}
+  else if(hrs>=8)add(t('21:00'),'Rain for most of the day. Bridie Lally calls it a soft day.');
+  else if(hrs>=2.5&&r()<0.5)add(t('21:00'),'Rain for about '+(NUM[Math.round(hrs)]||Math.round(hrs))+' hours. A soft day.');
+  const dawn=wxAt(t0+hm(7)*MIN);if(dawn.temp<0.6)add(t('07:10'),"Frost. Declan Forde's own van would not start. He says it's the alternator.");
+  const mn=moonPos(t0+hm(22)*MIN);if(mn.illum>0.985&&wxCore(t0+hm(22)*MIN).cloud<0.6)add(t('22:10'),'The moon is full. Bran barked at it until it went behind a cloud. He considers this a win.');
+  const o1=tzOff(t0-2*HOUR),o2=tzOff(t0+2*HOUR);if(o1!==o2)add(t('09:30'),o2<o1?'The clocks went back. The post office clock was already there.':'The clocks went forward. The post office clock declined.');
+  const sp=SPECIAL[D.md];if(sp)add(hm(sp[0]),sp[1]);
+  /* the incidental: three candidates a day from a shuffled pool, so nothing repeats for weeks */
+  const per=3,cl=Math.floor(POOL.length/per),cyc=Math.floor(pd/cl),pos=pd-cyc*cl,perm=poolPerm(cyc);
+  const X={rain:pm=>rainPm(pd,pm),wind:pm=>wxCore(t0+pm*MIN).wind,tl:turlough(t0+8*HOUR),mist:wxAt(t0+hm(8)*MIN).mist,
+    clearNight:pm=>sunPos(t0+pm*MIN).alt<-8&&wxCore(t0+pm*MIN).cloud<0.4};
+  for(let i=0;i<per;i++){const e=POOL[perm[pos*per+i]];if(!e)continue;const pm=hm(e[0])+Math.floor(r()*(e[1]-e[0])*60);if(e[3]&&!e[3](D,X,pm))continue;add(pm,e[2])}
+  ev.sort((a,b)=>a.pm-b.pm);if(_ev.size>120)_ev.clear();_ev.set(pd,ev);return ev}
+/* ================= drawing: primitives, sprites, buildings ================= */
+let g=null,vw=200,camX=0;
+const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+const ID=c=>c;
+const _sh=new Map();
+function shade(c,a){const k=c+a;let v=_sh.get(k);if(v)return v;const f=n=>clamp(parseInt(c.slice(n,n+2),16)+a,0,255).toString(16).padStart(2,'0');v='#'+f(1)+f(3)+f(5);_sh.set(k,v);return v}
+function rgba(c,a){return'rgba('+parseInt(c.slice(1,3),16)+','+parseInt(c.slice(3,5),16)+','+parseInt(c.slice(5,7),16)+','+a+')'}
+function disc(cx,cy,r,c){g.fillStyle=c;for(let dy=-r;dy<=r;dy++){const hw=Math.round(Math.sqrt(r*r-dy*dy));g.fillRect(cx-hw,cy+dy,hw*2+1,1)}}
+function line(x0,y0,x1,y1,c){g.fillStyle=c;x0=Math.round(x0);y0=Math.round(y0);x1=Math.round(x1);y1=Math.round(y1);const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1;let e=dx+dy;for(let n=0;n<400;n++){g.fillRect(x0,y0,1,1);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx}if(e2<=dx){e+=dx;y0+=sy}}}
+const GL={A:'010101111101101',B:'110101110101110',C:'011100100100011',D:'110101101101110',E:'111100110100111',F:'111100110100100',G:'011100101101011',H:'101101111101101',I:'111010010010111',J:'001001001101010',K:'101101110101101',L:'100100100100111',M:'101111111101101',N:'110101101101101',O:'010101101101010',P:'110101110100100',Q:'010101101110011',R:'110101110101101',S:'011100010001110',T:'111010010010010',U:'101101101101111',V:'101101101101010',W:'101101111111101',X:'101101010101101',Y:'101101010010010',Z:'111001010100111',
+  '0':'111101101101111','1':'010110010010111','2':'110001010100111','3':'110001010001110','4':'101101111001001','5':'111100110001110','6':'011100110101010','7':'111001010010010','8':'010101010101010','9':'010101011001110',
+  '.':'000000000000010',',':'000000000010100',"'":'010010000000000','!':'010010010000010','?':'110001010000010','-':'000000111000000','&':'010101010101011',':':'000010000010000'};
+function txt(x,y,s,c){g.fillStyle=c;for(let i=0;i<s.length;i++){const m=GL[s[i]];if(m)for(let k=0;k<15;k++)if(m[k]==='1')g.fillRect(x+i*4+k%3,y+(k/3|0),1,1)}}
+const tw=s=>s.length*4-1;
+function bmp(rows,x,y,pal,flip,T){for(let j=0;j<rows.length;j++){const row=rows[j],n=row.length;for(let i=0;i<n;i++){const ch=row[i];if(ch==='.')continue;const c=pal[ch];if(!c)continue;g.fillStyle=T(c);g.fillRect(flip?x+n-1-i:x+i,y+j,1,1)}}}
+
+/* ---- people ---- */
+function drawUpper(px,top,sw,v,st,kid){
+  const P=v.pal,S=v.st||{},torH=kid?4:6,hy=top-4,aU=kid?1:2;
+  px(-2,top,4,torH,P.top);
+  if(S.band)px(-2,top+3,4,1,S.band);
+  if(S.apron)px(0,top+2,2,torH,S.apron);
+  if(st.carry==='bag'){px(-3,top+3,2,3,'#6b4a2a');px(-1,top,1,3,'#4a3420')}
+  if(st.bag&&S.bagc)px(-3,top,1,3,S.bagc);
+  px(0,top+1,1,aU,P.arm);px(sw,top+1+aU,1,2,P.arm);px(sw,top+3+aU,1,1,P.skin);
+  if(st.carry==='case')px(sw-2,top+4+aU,5,2,'#241c18');
+  if(st.carry==='chips')px(sw,top+4+aU,2,2,'#e8e0c8');
+  if(st.carry==='hurl'){px(-1,top-1,1,2,'#d9c08a');px(-2,top-2,1,1,'#d9c08a');px(-4,top-3,3,1,'#d9c08a')}
+  /* head */
+  px(-1,hy,3,4,P.skin);px(-2,hy+1,1,2,P.hair);
+  if(S.bald)px(-2,hy,1,1,P.hair);else px(-2,hy,4,1,P.hair);
+  px(0,hy+1,1,1,'#2a2020');
+  if(S.tash)px(1,hy+2,1,1,'#77706a');
+  if(S.long)px(-2,hy+1,1,5,P.hair);
+  if(S.bun)px(-3,hy+1,1,2,P.hair);
+  if(S.pony)px(-3,hy+2,1,3,P.hair);
+  if(S.pig)px(-3,hy+2,1,2,P.hair);
+  const hc=S.hatc||'#1a2238';
+  if(S.hat==='garda'){px(-2,hy-1,4,1,hc);px(-2,hy,5,1,hc);px(0,hy-1,1,1,'#d9c26a')}
+  else if(S.hat==='flat'||S.hat==='cap'){px(-2,hy-1,4,1,hc);px(-2,hy,5,1,hc)}
+  else if(S.hat==='scarf'){px(-2,hy-1,4,1,P.hair);px(-2,hy+1,1,3,P.hair)}
+  if(st.umb&&S.umb){const c=S.umb,d2=shade(c,-28);px(-2,hy-6,5,1,c);px(-4,hy-5,9,1,c);px(-5,hy-4,11,1,d2);px(1,hy-3,1,top+3-(hy-3),'#3a3a3a')}
+}
+function drawPerson(x,y,v,st,T){
+  const P=v.pal,S=v.st||{},d=st.dir||1,kid=!!v.kid,legH=kid?4:6,torH=kid?4:6;
+  x=Math.round(x);y=Math.round(y);
+  const px=(lx,ly,w,h,c)=>{if(h<=0||w<=0)return;g.fillStyle=T(c);g.fillRect(d>0?x+lx:x-lx-w+1,y+ly,w,h)};
+  g.fillStyle='rgba(0,0,0,0.16)';g.fillRect(x-3,y,7,1);
+  if(st.sit){const hip=-5;px(-1,hip,4,2,P.leg);px(2,hip+2,2,2,P.leg);px(2,-1,3,1,P.shoe);
+    if(S.skirt)px(-2,hip,5,2,S.skirt);if(S.coat)px(-2,hip,4,2,P.top);
+    drawUpper(px,hip-torH,0,v,st,kid);if(S.stick)px(4,hip-2,1,6,'#5a4028');return}
+  const fr=st.moving?(Math.floor(st.dist/3.5)&3):-1,contact=fr===0||fr===2;
+  const hip=-legH+(contact?1:0);let lc=P.leg,ld=shade(P.leg,-24);if(fr===2){const q=lc;lc=ld;ld=q}
+  if(contact){const n=-hip,up=Math.max(1,(n-1)>>1),lo=n-1-up;
+    px(-2,hip,2,up,ld);px(-3,hip+up,2,lo,S.wellies?'#1a1a1a':ld);px(-3,-1,2,1,P.shoe);
+    px(0,hip,2,up,lc);px(1,hip+up,2,lo,S.wellies?'#1a1a1a':lc);px(1,-1,3,1,P.shoe)}
+  else{px(-1,hip,2,legH-1,lc);if(S.wellies)px(-1,-3,2,2,'#1a1a1a');px(-1,-1,3,1,P.shoe);if(fr===1||fr===3)px(1,hip+1,1,2,ld)}
+  if(S.skirt){const sh=kid?2:3;px(-2,hip,4,sh,S.skirt);px(-3,hip+sh-1,6,1,S.skirt)}
+  if(S.coat){px(-2,hip,4,3,P.top);px(-2,hip+3,4,1,shade(P.top,-22))}
+  const top=hip-torH,sw=contact?(fr===0?-1:1):0;
+  drawUpper(px,top,sw,v,st,kid);
+  if(S.stick&&!st.umb)px(2,top+5,1,-(top+5),'#5a4028');
+}
+const RING=[[2,0,3],[1,1,1],[5,1,1],[0,2,1],[6,2,1],[0,3,1],[6,3,1],[0,4,1],[6,4,1],[1,5,1],[5,5,1],[2,6,3]];
+function drawBike(x,y,d,dist,T,rider,st,col){
+  x=Math.round(x);y=Math.round(y);const K=T(col||'#16161a'),X=lx=>x+d*lx;
+  g.fillStyle='rgba(0,0,0,0.16)';g.fillRect(x-8,y,17,1);
+  for(const c of[-5,5]){g.fillStyle=K;for(const r of RING)g.fillRect(X(c)-3+r[0],y-7+r[1],r[2],1);
+    const a=dist/3.5+(c>0?1:0);g.fillStyle=T('#8a8f96');g.fillRect(X(c)+Math.round(Math.cos(a)*2),y-4+Math.round(Math.sin(a)*2),1,1);g.fillRect(X(c)-Math.round(Math.cos(a)*2),y-4-Math.round(Math.sin(a)*2),1,1)}
+  line(X(-5),y-4,X(-2),y-9,K);line(X(-2),y-9,X(4),y-9,K);line(X(4),y-10,X(5),y-4,K);line(X(0),y-4,X(-2),y-9,K);line(X(0),y-4,X(4),y-9,K);line(X(-5),y-4,X(0),y-4,K);
+  g.fillStyle=K;g.fillRect(d>0?x-3:x+1,y-10,3,1);g.fillRect(d>0?x+3:x-4,y-11,2,1);
+  if(rider){const P=rider.pal,a=dist/4,px=(lx,ly,w,h,c)=>{if(h<=0||w<=0)return;g.fillStyle=T(c);g.fillRect(d>0?x+lx:x-lx-w+1,y+ly,w,h)};
+    const p1x=Math.round(Math.cos(a)*2),p1y=-4+Math.round(Math.sin(a)*2);
+    line(X(-1),y-10,X(-p1x),y-4-(p1y+4),T(shade(P.leg,-24)));line(X(-1),y-10,X(p1x+1),y+p1y,T(P.leg));
+    g.fillStyle=T(P.shoe);g.fillRect(X(p1x+1),y+p1y,1,1);
+    drawUpper((lx,ly,w,h,c)=>px(lx-1,ly,w,h,c),-16,2,rider,st||{},false)}
+}
+function drawTractor(x,y,d,dist,T,driver){
+  x=Math.round(x);y=Math.round(y);const px=(lx,ly,w,h,c)=>{g.fillStyle=T(c);g.fillRect(d>0?x+lx:x-lx-w+1,y+ly,w,h)},X=lx=>x+d*lx,red='#b3261e';
+  g.fillStyle='rgba(0,0,0,0.18)';g.fillRect(x-13,y,27,1);
+  px(-2,-9,13,2,'#7a1a14');px(0,-14,12,6,red);px(11,-13,1,4,'#3a3a3a');px(8,-19,1,5,'#3a3a3a');
+  px(-10,-21,11,1,red);px(-10,-20,1,9,'#3a3a3a');px(0,-20,1,7,'#3a3a3a');
+  if(driver){const pp=(lx,ly,w,h,c)=>px(lx-5,ly,w,h,c);drawUpper(pp,-15,2,driver,{},false)}
+  px(-13,-13,10,1,red);px(-14,-12,1,3,red);
+  disc(X(-7),y-6,6,T('#1a1a1a'));disc(X(-7),y-6,2,T('#c9b23a'));disc(X(9),y-3,3,T('#1a1a1a'));disc(X(9),y-3,1,T('#c9b23a'));
+  const a=dist/6;g.fillStyle=T('#3a3a3a');g.fillRect(X(-7)+Math.round(Math.cos(a)*4),y-6+Math.round(Math.sin(a)*4),1,1);g.fillRect(X(-7)-Math.round(Math.cos(a)*4),y-6-Math.round(Math.sin(a)*4),1,1);
+}
+function drawBus(x,y,d,T,b){
+  x=Math.round(x);y=Math.round(y);const px=(lx,ly,w,h,c)=>{g.fillStyle=T(c);g.fillRect(d>0?x+lx:x-lx-w+1,y+ly,w,h)},X=lx=>x+d*lx;
+  g.fillStyle='rgba(0,0,0,0.2)';g.fillRect(x-30,y,61,1);
+  px(-30,-23,60,20,'#eeeae0');px(-29,-24,58,1,'#d2cec2');px(-30,-8,60,3,'#c2281e');px(-30,-5,60,2,'#cfcabd');
+  px(-27,-21,44,7,'#3d5066');for(let k=-19;k<17;k+=9)px(k,-21,1,7,'#eeeae0');
+  px(22,-21,7,10,'#4d6278');px(18,-21,3,16,'#2e3d50');px(29,-9,1,2,'#ffe9a0');
+  const s='42 '+b.dest,w=tw(s);txt(x-(d>0?6:-6)-(w>>1),y-13,s,T('#22324f'));
+  disc(X(-18),y-3,3,T('#1a1a1a'));disc(X(17),y-3,3,T('#1a1a1a'));disc(X(-18),y-3,1,T('#8a8f96'));disc(X(17),y-3,1,T('#8a8f96'));
+}
+const COWB=['..............hh.','.BBBBBBBBBBBB.HHH','BBWWWBBBBWWBBBHHH','BWWWWWBBWWWWBBHeH','BWWWWBBBBWWWBBHHN','BBWWBBBBBBWWBB.NN','BBBBBBWWBBBBBB...','.BBBBWWWWBBBB....'];
+const COWP=[{B:'#26262a',W:'#eeeae0',H:'#26262a',h:'#d8d0c0',e:'#eeeae0',N:'#d99a9a'},{B:'#eeeae0',W:'#26262a',H:'#eeeae0',h:'#d8d0c0',e:'#26262a',N:'#d99a9a'},{B:'#7a4a2a',W:'#e8dcc8',H:'#7a4a2a',h:'#d8d0c0',e:'#26201a',N:'#d99a9a'}];
+function drawCow(x,y,d,dist,T,k,moving){
+  x=Math.round(x);y=Math.round(y);const P=COWP[k%3],flip=d<0,left=x-8,f=moving?(Math.floor(dist/3)&1):0;
+  g.fillStyle='rgba(0,0,0,0.16)';g.fillRect(x-7,y,14,1);
+  bmp(COWB,left,y-12,P,flip,T);
+  const legs=[[1,f?1:0],[3,f?-1:0],[10,f?-1:0],[12,f?1:0]];g.fillStyle=T(P.B);
+  for(const l of legs){const lx=l[0]+l[1],X=flip?left+16-lx:left+lx;g.fillRect(X,y-4,1,3);g.fillStyle=T('#1a1a1a');g.fillRect(X,y-1,1,1);g.fillStyle=T(P.B)}
+  g.fillStyle=T(P.N);g.fillRect(flip?left+16-5:left+4,y-4,2,1);
+  g.fillStyle=T(P.B);g.fillRect(flip?left+16:left,y-9,1,4);
+}
+const DOGB=['........K.','K.....KKKW','.KKWWKKKWK','.KKKKKKW..'],DOGP={K:'#1c1c20',W:'#eeeae0'};
+const DOGL=['..........','......KK..','K.KKKKKKKW','KKKWWKKWW.'];
+function drawDog(x,y,d,dist,T,moving,lying){x=Math.round(x);y=Math.round(y);const flip=d<0,left=x-5;
+  g.fillStyle='rgba(0,0,0,0.16)';g.fillRect(x-4,y,9,1);
+  if(lying){bmp(DOGL,left,y-4,DOGP,flip,T);return}
+  bmp(DOGB,left,y-6,DOGP,flip,T);const f=moving?(Math.floor(dist/3)&1):0;g.fillStyle=T('#1c1c20');
+  for(const l of[[1,f],[3,-f],[6,-f],[8,f]]){const lx=l[0]+l[1];g.fillRect(flip?left+9-lx:left+lx,y-2,1,2)}}
+const FOXB=['...........F.F','FFf.....FFFFFF','WFFFFFFFFFFFFk','..FFFFFFFFWW..'],FOXP={F:'#c8641e',f:'#a54e14',W:'#f1ede2',k:'#1a1a1a'};
+function drawFox(x,y,d,dist,T,moving){x=Math.round(x);y=Math.round(y);const flip=d<0,left=x-7;bmp(FOXB,left,y-6,FOXP,flip,T);const f=moving?(Math.floor(dist/3)&1):0;g.fillStyle=T('#3a2418');
+  for(const l of[[3,f],[5,-f],[9,-f],[11,f]]){const lx=l[0]+l[1];g.fillRect(flip?left+13-lx:left+lx,y-2,1,2)}}
+const CATB=['...C.C','...CCC','...CeC','..CCCC','.CCCC.','CCCCC.','C.CC..'],CATP={C:'#17171a',e:'#d8d040'};
+const SWANB=['.....W.','....W.o','....W..','.WWWW..','WWWWWW.'],SWANP={W:'#f4f2ea',o:'#e08a2a'};
+const HENB=['...r.','..BBo','BBBB.','.BBB.'],HENP={B:'#9a5a2e',r:'#c0392b',o:'#e0a030'};
+
+/* ---- building pieces ---- */
+const WIN=[],BLD=[];
+function win(x,y,w,h,room,o){const wn=Object.assign({x,y,w,h,room,trim:'#f1ede2',col:'#ffcf78',kind:'sash'},o||{});WIN.push(wn);return wn}
+function drawWin(wn){
+  if(wn.kind==='bay')return;
+  R(wn.x-1,wn.y-1,wn.w+2,wn.h+2,wn.trim);R(wn.x,wn.y,wn.w,wn.h,'#2f3b48');R(wn.x+1,wn.y+1,1,2,'#5b6e7e');
+  if(wn.kind==='sash'||wn.kind==='attic'){R(wn.x,wn.y+(wn.h>>1),wn.w,1,wn.trim);R(wn.x+(wn.w>>1),wn.y,1,wn.h,wn.trim);R(wn.x-2,wn.y+wn.h+1,wn.w+4,1,shade(wn.trim,-40))}
+  else if(wn.kind==='shop'||wn.kind==='pub'){for(let k=wn.x+9;k<wn.x+wn.w-2;k+=10)R(k,wn.y,1,wn.h,wn.trim);if(wn.kind==='pub')R(wn.x,wn.y+7,wn.w,1,wn.trim)}
+}
+function slate(x,w,y0,y1,c){R(x-1,y0,w+2,y1-y0,c);R(x+1,y0,w-2,1,shade(c,-22));for(let y=y0+3;y<y1;y+=3)R(x-1,y,w+2,1,shade(c,-12));R(x-1,y1-1,w+2,1,shade(c,-30))}
+function chimney(x,y0,y1,c){R(x,y0,6,y1-y0,c);R(x-1,y0,8,2,shade(c,-30));R(x+1,y0-2,1,2,'#7a4a36');R(x+4,y0-2,1,2,'#7a4a36')}
+function walls(x,w,top,c){R(x,top,w,GY-top,c);R(x,top,1,GY-top,shade(c,12));R(x+w-1,top,1,GY-top,shade(c,-20));R(x,GY-2,w,2,shade(c,-34))}
+function door(x,y,w,c,o){const h=GY-y;R(x-1,y-1,w+2,h+1,(o&&o.frame)||'#f1ede2');R(x,y,w,h,c);R(x+1,y+1+(o&&o.fan?4:0),w-2,(h>>1)-3,shade(c,-18));R(x+1,y+(h>>1)+1,w-2,(h>>1)-3,shade(c,-18));R(x+w-2,y+(h>>1),1,1,'#d9c26a');if(o&&o.fan)R(x+1,y+1,w-2,3,'#2f3b48')}
+function stoneWall(x0,x1,y0){R(x0,y0,x1-x0,GY-y0,'#8f918b');R(x0,y0,x1-x0,1,'#a9aba4');for(let x=x0;x<x1;x++){const h=hash('sw',x)%7;if(h===0)R(x,y0+1+(hash('swy',x)%(GY-y0-1)),2,1,'#73756f');else if(h===1)R(x,y0+2+(hash('swz',x)%(GY-y0-2)),1,1,'#b4b6ae')}}
+function gate(x0,x1,open){const c='#b9bec2',p='#8a8f93';R(x0,121,2,15,p);R(x1-2,121,2,15,p);if(open){R(x0+2,123,3,13,c);return}for(const y of[123,126,129,132])R(x0+2,y,x1-x0-4,1,c);line(x0+2,132,x1-3,123,c)}
+function lampPost(x){R(x,98,1,38,'#2f3438');R(x,98,4,1,'#2f3438');R(x+2,99,3,2,'#d9d4c0')}
+const LAMPS=[188,430,591,726,915];
+
+/* ---- the buildings, east (left) to west ---- */
+BLD.push({id:'farm',name:"Regan's yard",x:6,w:58,top:94,wins:[win(12,112,30,24,'farm:bay',{kind:'bay',col:'#f2c478',ground:1})],
+  draw(S){const x=6,w=58,top=94,red='#8f3b2b',ins=[13,9,6,4,3,2,1,1,0,0];
+    for(let i=0;i<10;i++)R(x+ins[i],top+i,w-ins[i]*2,1,i<3?'#a6503c':red);
+    R(x,top+10,w,GY-top-10,red);for(let k=x+3;k<x+w;k+=4)R(k,top+10,1,GY-top-10,'#7c3125');
+    R(12,112,30,24,'#241b17');
+    if(S.tractorHome)drawTractor(27,GY,1,0,ID,null);
+    else{R(14,126,12,10,'#cfae42');R(27,126,12,10,'#d9b84a');R(20,117,12,9,'#e0c257');R(14,130,25,1,'#b3922f');R(20,121,12,1,'#b3922f')}
+    R(46,116,10,20,'#5d6a6e');R(47,117,8,9,'#4d595d');
+    gate(64,86,S.cowsMoving);
+    R(88,100,1,36,'#3a3a3a');R(62,100,27,9,'#f1ede2');R(61,102,1,5,'#f1ede2');R(60,104,1,1,'#f1ede2');txt(64,102,'GORT 6','#1c1c20')}});
+BLD.push({id:'cottage',name:"Quinn's",x:92,w:62,top:91,wins:[win(99,116,9,9,'cottage:down',{trim:'#a3312b',ground:1}),win(138,116,9,9,'cottage:bed',{trim:'#a3312b',ground:1})],
+  draw(S){const x=92,w=62,th=['#b98f3e','#c79c48','#d1a851','#c79c48','#b98f3e'];
+    R(x,106,w,30,'#efece2');R(x,133,w,3,'#c9c5b8');R(x+w-1,106,1,30,'#d5d1c4');
+    chimney(x+8,83,92,'#e6e2d6');
+    for(let i=0;i<15;i++){const ins=i<2?4-i*2:0;R(x-2+ins,91+i,w+4-ins*2,1,th[(i>>1)%5])}
+    for(let k=x-2;k<x+w+2;k+=2)R(k,106,1,1,'#a67c30');R(x-2,105,w+4,1,'#9a7028');
+    R(119,116,11,20,'#f1ede2');R(120,117,9,19,'#a3312b');R(120,126,9,1,'#7c221d');R(121,118,7,7,'#8c2a25');R(127,129,1,1,'#d9c26a');
+    for(const wn of this.wins)drawWin(wn);
+    R(110,132,3,4,'#b5673e');R(110,130,3,2,S.D.mo>=4&&S.D.mo<=9?'#e0507a':'#5a7a4a');R(133,132,3,4,'#b5673e');R(133,130,3,2,S.D.mo>=4&&S.D.mo<=9?'#f2c230':'#5a7a4a')}});
+BLD.push({id:'garda',name:'The barracks',x:194,w:62,top:64,wins:[win(200,85,9,13,'garda:up1'),win(220,85,9,13,'garda:up1'),win(240,85,9,13,'garda:up2'),win(200,110,9,14,'garda:office',{ground:1,col:'#fff1c2'}),win(240,110,9,14,'garda:office',{ground:1,col:'#fff1c2'})],
+  draw(S){walls(194,62,78,'#b9b7ae');chimney(200,56,65,'#a6a49b');chimney(244,56,65,'#a6a49b');slate(194,62,64,78,'#4a5560');
+    door(220,116,9,'#1f2a44',{fan:1});R(212,100,25,8,'#1f2a44');txt(215,102,'GARDA','#e8e4da');
+    R(231,110,3,1,'#2f3438');R(232,111,3,4,'#3a6ad8');R(232,110,3,1,'#16161a');
+    for(const wn of this.wins)drawWin(wn)}});
+BLD.push({id:'shop',name:"O'Shaughnessy's",x:262,w:68,top:67,wins:[win(267,115,29,16,'shop:shop',{kind:'shop',ground:1,col:'#ffe6a8',trim:'#1f5a3c'}),win(301,117,7,9,'shop:shop',{kind:'door',ground:1,col:'#ffe6a8',trim:'#1f5a3c'}),win(313,115,12,16,'shop:shop',{kind:'shop',ground:1,col:'#ffe6a8',trim:'#1f5a3c'}),win(270,87,9,13,'shop:up1'),win(291,87,9,13,'shop:up1'),win(312,87,9,13,'shop:up2')],
+  draw(S){walls(262,68,80,'#e8d9a8');chimney(268,59,68,'#cfc193');slate(262,68,67,80,'#525b63');
+    R(262,104,68,9,'#1f5a3c');R(262,104,68,1,'#e9c96a');R(262,112,68,1,'#174a30');txt(271,106,"O'SHAUGHNESSY",'#e9c96a');
+    R(299,114,11,22,'#f1ede2');R(300,115,9,21,'#1f5a3c');
+    for(const wn of this.wins)drawWin(wn);
+    R(268,131,27,5,'#1f5a3c');R(314,131,10,5,'#1f5a3c');
+    R(269,121,25,1,'#6a5a3a');R(271,118,3,3,'#c0392b');R(276,117,2,4,'#e9c96a');R(280,118,4,3,'#3d6aa8');R(287,117,3,4,'#e8e4da');R(272,124,4,4,'#e0a030');R(279,123,3,5,'#2e7d5b');R(285,124,5,4,'#b03a48');
+    R(315,117,8,5,'#0b6b46');R(316,118,6,1,'#e8e4da');R(316,120,4,1,'#e8e4da');
+    R(326,124,4,12,'#0b6b46');R(326,123,4,1,'#084e33');R(327,127,2,1,'#16161a');R(325,135,6,1,'#084e33');
+    if(S.shopOpen){R(295,128,4,8,'#e8e4da');R(295,128,4,1,'#1c1c20');R(296,130,2,1,'#1c1c20');R(296,132,2,1,'#6a6a6a')}}});
+BLD.push({id:'pub',name:"Lally's",x:336,w:80,top:64,wins:[win(342,116,19,15,'pub:bar',{kind:'pub',ground:1,col:'#ffb648',trim:'#5e1f24'}),win(381,116,19,15,'pub:bar',{kind:'pub',ground:1,col:'#ffb648',trim:'#5e1f24'}),win(367,117,9,7,'pub:bar',{kind:'door',ground:1,col:'#ffb648',trim:'#5e1f24'}),win(346,85,9,13,'pub:up1'),win(371,85,9,13,'pub:up2'),win(396,85,9,13,'pub:up3')],
+  draw(S){const ox='#5e1f24';walls(336,80,78,'#efe6d2');chimney(342,56,65,'#d9d0bc');chimney(404,56,65,'#d9d0bc');slate(336,80,64,78,'#4a5560');
+    R(336,104,80,10,ox);R(336,104,80,1,'#e9c96a');R(336,113,80,1,'#e9c96a');txt(363,107,"LALLY'S",'#e9c96a');
+    R(336,131,80,5,ox);R(365,114,13,22,ox);R(366,115,11,21,'#3d1418');R(371,115,1,21,ox);R(369,126,1,1,'#d9c26a');R(373,126,1,1,'#d9c26a');
+    for(const wn of this.wins)drawWin(wn);
+    R(384,131,15,1,'#6b4a2a');R(385,132,1,4,'#4a3420');R(397,132,1,4,'#4a3420');R(384,128,15,1,'#6b4a2a');R(384,129,1,2,'#4a3420');R(398,129,1,2,'#4a3420');
+    R(405,126,7,10,'#6b4a2a');R(405,128,7,1,'#2f3438');R(405,133,7,1,'#2f3438');R(406,125,5,1,'#4a3420');
+    R(416,96,7,1,'#2a2a2a');R(417,98,7,9,ox);R(418,99,5,7,'#e9c96a');R(419,100,3,5,ox);R(420,101,1,3,'#e9c96a');
+    if(S.xmas)for(let k=338;k<414;k+=4)R(k,115,1,1,['#e23b3b','#f2c230','#3aa85a','#3d6ad8'][((k>>2)+S.tick4)%4])}});
+BLD.push({id:'grill',name:'The Rio Grill',x:528,w:60,top:78,wins:[win(533,119,28,13,'grill:shop',{kind:'shop',ground:1,col:'#e6ffe0',trim:'#1f8a4c'}),win(567,120,7,8,'grill:shop',{kind:'door',ground:1,col:'#e6ffe0',trim:'#1f8a4c'}),win(538,95,9,10,'grill:up1'),win(567,95,9,10,'grill:up2')],
+  draw(S){walls(528,60,90,'#f2d24a');chimney(574,70,79,'#d9bc3c');slate(528,60,78,90,'#525b63');
+    R(528,108,60,9,'#1f8a4c');R(528,108,60,1,'#f7e26a');txt(541,110,'RIO GRILL','#f7e26a');R(531,110,7,5,'#1f8a4c');R(532,112,5,1,'#f7e26a');R(534,111,1,3,'#f7e26a');R(533,112,3,1,'#2a4fa0');
+    R(565,117,11,19,'#f1ede2');R(566,118,9,18,'#1f8a4c');
+    for(const wn of this.wins)drawWin(wn);
+    R(534,132,26,4,'#1f8a4c');R(579,121,6,10,'#f1ede2');R(580,123,4,1,'#3a3a3a');R(580,125,4,1,'#3a3a3a');R(580,127,3,1,'#3a3a3a');
+    R(589,126,4,10,'#2f5a3a');R(588,125,6,1,'#22422a')}});
+BLD.push({id:'savant',name:"The Savant's house",x:594,w:48,top:44,wins:[win(614,50,9,8,'savant:study',{kind:'attic',col:'#c8f7b0',trim:'#3b4640'})],
+  draw(S){const wc='#5d6b63',sh='#2b332f';walls(594,48,62,wc);chimney(598,36,45,'#4f5b54');slate(594,48,44,62,'#3a424b');
+    R(611,47,15,13,wc);R(610,46,17,1,'#3a424b');R(612,45,13,1,'#3a424b');drawWin(this.wins[0]);
+    for(const y of[68,91])for(const x of[601,626]){R(x-1,y-1,11,16,'#3b4640');R(x,y,9,14,sh);for(let k=y+1;k<y+14;k+=2)R(x,k,9,1,'#232a27');R(x+4,y,1,14,'#3b4640')}
+    for(const x of[600,627]){R(x-1,113,11,15,'#3b4640');R(x,114,9,13,sh);for(let k=115;k<127;k+=2)R(x,k,9,1,'#232a27');R(x+4,114,1,13,'#3b4640')}
+    door(614,114,9,'#16181a',{frame:'#3b4640',fan:1});R(617,124,3,2,'#d9c26a');
+    const iv=S.D.mo>=4&&S.D.mo<=10?['#3f6a3a','#4f7d45']:['#3d5237','#5a4a36'];
+    for(let i=0;i<70;i++){const hx=594+(hash('iv',i)%14)+((hash('ivb',i)%3===0)?(hash('ivc',i)%20):0),hy=64+(hash('ivy',i)%70);R(hx,hy,1+(i%2),1+((i>>1)%2),iv[i%2])}
+    R(618,34,1,10,'#2a2a2a');R(614,36,9,1,'#2a2a2a');R(S.wx.wind>0.5?622:614,35,1,3,'#2a2a2a');R(616,38,1,1,'#2a2a2a');R(620,38,1,1,'#2a2a2a');
+    if(S.lit['savant:study']&&S.wx.cloud<0.5)R(622,51,5,1,'#b9a25a')}});
+BLD.push({id:'terA',name:"Miss Cahill's",x:646,w:38,top:74,wins:[win(666,115,11,14,'terA:down',{ground:1}),win(652,92,9,12,'terA:up'),win(669,92,9,12,'terA:up2')],
+  draw(S){walls(646,38,86,'#e3a6b0');slate(646,38,74,86,'#525b63');door(652,117,8,'#3d5a8a',{fan:1});for(const wn of this.wins)drawWin(wn);
+    R(665,130,13,2,'#6b4a2a');if(S.D.mo>=4&&S.D.mo<=10)for(let k=666;k<677;k+=2)R(k,128,1,2,k%4?'#e0507a':'#f2c230')}});
+BLD.push({id:'terB',name:"Glynn's",x:684,w:38,top:74,wins:[win(690,115,11,14,'terB:down',{ground:1}),win(690,92,9,12,'terB:upL'),win(707,92,9,12,'terB:upR')],
+  draw(S){walls(684,38,86,'#a9c4dc');slate(684,38,74,86,'#525b63');chimney(681,66,75,'#b9a79a');door(707,117,8,'#b03a48',{fan:1});for(const wn of this.wins)drawWin(wn);
+    R(718,128,2,8,'#8a5a30');R(716,124,6,4,'#d9c08a')}});
+BLD.push({id:'school',name:'The national school',x:730,w:88,top:86,wins:[win(736,110,8,17,'school:class',{ground:1,col:'#f4f8ff'}),win(749,110,8,17,'school:class',{ground:1,col:'#f4f8ff'}),win(793,110,8,17,'school:class',{ground:1,col:'#f4f8ff'}),win(806,110,8,17,'school:class',{ground:1,col:'#f4f8ff'})],
+  draw(S){const c='#e9e4d4';walls(730,88,104,c);slate(730,88,90,104,'#4a5560');
+    for(let i=0;i<10;i++)R(777-i,92+i,i*2+1,1,'#dcd6c4');R(767,102,21,34,'#dcd6c4');R(767,102,1,34,shade('#dcd6c4',12));R(787,102,1,34,shade('#dcd6c4',-20));
+    R(775,85,5,7,'#cfc9b6');R(776,87,3,3,'#3a3a3a');R(777,88,1,2,'#d9c26a');R(775,84,5,1,'#4a5560');
+    door(773,116,9,'#2e6b4a',{fan:1});txt(768,108,'SCOIL','#3a3a3a');
+    for(const wn of this.wins)drawWin(wn);R(818,128,28,8,'#7d7b76')}});
+BLD.push({id:'garage',name:'Forde Motors',x:846,w:66,top:93,wins:[win(852,111,32,25,'garage:bay',{kind:'bay',ground:1,col:'#fff3d0'}),win(890,115,13,11,'garage:office',{ground:1})],
+  draw(S){const c='#c9c2ae';walls(846,66,98,c);for(let k=849;k<912;k+=3)R(k,98,1,38,'#bcb5a0');R(845,93,68,5,'#8f3b2b');R(845,97,68,1,'#6f2c20');
+    R(852,100,56,9,'#22324f');txt(857,102,'FORDE MOTORS','#f1ede2');
+    R(852,111,32,25,'#1f1c1a');R(857,124,22,7,'#3a3633');R(861,119,13,5,'#3a3633');R(859,131,4,3,'#151312');R(873,131,4,3,'#151312');R(866,112,1,7,'#3a3633');
+    drawWin(this.wins[1]);
+    R(905,120,5,16,'#b3261e');R(906,122,3,4,'#f1ede2');R(906,117,3,3,'#f1ede2');R(907,116,1,1,'#f1ede2');R(910,124,1,6,'#16161a');
+    R(886,127,4,3,'#16161a');R(886,130,4,3,'#222226');R(886,133,4,3,'#16161a');
+    drawBike(898,GY,1,0,ID,null,null,'#a03a2a')}});
+const BBY={};for(const b of BLD)BBY[b.id]=b;
+/* ================= the moment: who is where, which lights are on ================= */
+function snapshot(ms){
+  const pd=pday(ms),pm=clamp(pmin(ms),0,1439.999),D=dinfo(pd),sun=sunPos(ms),moon=moonPos(ms),w=wx(ms);
+  const S={ms,pd,pm,D,sun,moon,wx:w,tsec:ms/1000,night:smooth(4,-9,sun.alt)};
+  S.dark=sun.alt<(w.cloud>0.7?1.5:-1.2);S.dull=!S.dark&&sun.alt<14&&(w.cloud>0.82||w.rain>0.35);
+  S.shopOpen=shopOpen(D,pm);S.pubOpen=pubOpen(D,pm);S.grillOpen=grillOpen(D,pm);S.schoolIn=schoolIn(D,pm);S.garageOpen=garageOpen(D,pm);
+  const ses=sessionTimes(D);S.session=!!(ses&&pm>=ses.start&&pm<ses.end);
+  const tr=trainingTimes(D);S.training=!!(tr&&pm>=tr[0]&&pm<tr[1]);S.match=matchDay(D)&&pm>=t('14:00')&&pm<t('15:25');
+  S.xmas=(D.mo===12&&D.d>=8)||(D.mo===1&&D.d<=6);S.halloween=D.mo===10&&D.d>=25;S.bunting=D.md===803?1:D.md===317?2:0;S.tick4=Math.floor(ms/2600)%4;
+  S.ents=entities(pd).map(v=>stateOf(v,pd,pm));S.by={};for(const e of S.ents)S.by[e.v.id]=e;
+  S.wash=washingAt(pd,pm);S.bike=bikeState(pd,pm);S.tl=turlough(ms);
+  let out=false;for(const s of getPlan(VBY.jimmy,pd).stops)if(s.mode==='tractor'&&pm>=s.go)out=!(s.place==='farm'&&pm>=s.arr);S.tractorHome=!out;
+  S.cowsMoving=S.ents.some(e=>e.v.sprite==='cow'&&e.moving);
+  S.buses=buses(pd).map(b=>({b,x:busX(b,pm)})).filter(o=>o.x>-80&&o.x<W+80);
+  const sl=savantLight(pd);S.savantOn=!!(sl&&pm>=sl[0]&&pm<sl[1]);
+  S.inPub=S.ents.filter(e=>e.hidden&&e.place==='pub'&&!e.v.animal&&e.act!=='asleep'&&e.act!=='going to bed');
+  S.lit=litRooms(S);
+  S.wet=w.rain>0||wxCore(ms-25*MIN).rain>0;
+  return S}
+function bikeState(pd,pm){const G=gag(pd),P=getPlan(VBY.tom,pd);let x=G.moved?G.x:RACK,riding=false;
+  for(const s of P.stops){if(s.mode!=='bike')continue;if(pm>=s.arr)x=s.place==='garda'?RACK:s.x+7;else if(pm>=s.go){riding=true;break}}
+  let self=false,dir=1,dist=0;
+  if(!riding&&pm>=1350){const N=gag(pd+1);if(N.moved){const d=Math.abs(N.x-RACK),f=clamp((pm-1350)/(d/3.5/60),0,1);x=lerp(RACK,N.x,f);self=f<1;dir=N.x>RACK?1:-1;dist=d*f}}
+  return{x,riding,self,dir,dist}}
+function litRooms(S){const L={},by=S.by,pm=S.pm,dl=S.dark||S.dull;
+  const hm=id=>by[id]&&by[id].home,aw=id=>hm(id)&&by[id].awake,bd=id=>hm(id)&&by[id].bedding;
+  const inn=(id,p)=>by[id]&&by[id].hidden&&by[id].place===p;
+  if(S.dark){
+    if(aw('maureen'))L['cottage:down']=1;if(bd('maureen'))L['cottage:bed']=1;
+    if(aw('tom')&&(pm>=t('18:00')||pm<t('08:00')))L['garda:up1']=1;if(bd('tom'))L['garda:up2']=1;
+    if(aw('nuala')&&!S.shopOpen)L['shop:up1']=1;if(bd('nuala'))L['shop:up2']=1;
+    if((aw('bridie')&&pm>=t('19:30'))||bd('bridie'))L['pub:up1']=1;
+    if(aw('mossie')&&pm<t('10:30'))L['pub:up2']=1;if(bd('mossie'))L['pub:up3']=1;
+    if((aw('luciana')&&!S.grillOpen&&!/scrubbing/.test(by.luciana.act))||aw('rafa'))L['grill:up1']=1;if(bd('rafa')||bd('luciana'))L['grill:up2']=1;
+    if(aw('niamh'))L['terA:down']=1;if(bd('niamh')){L['terA:up']=1;L['terA:up2']=1}
+    if(aw('paddy')||aw('cian')||aw('saoirse'))L['terB:down']=1;if(bd('cian')||bd('saoirse'))L['terB:upL']=1;if(bd('paddy'))L['terB:upR']=1;
+    if(aw('declan')&&!S.garageOpen)L['garage:office']=1;
+    if(inn('jimmy','farm')&&/milking|foddering|yard/.test(by.jimmy.act))L['farm:bay']=1}
+  if(dl){
+    if((inn('tom','garda')&&by.tom.awake&&/desk|day room|locking|paper/.test(by.tom.act))||inn('aoife','garda'))L['garda:office']=1;
+    if(S.shopOpen||(inn('nuala','shop')&&/cashing|papers/.test(by.nuala.act))||inn('paddy','shop'))L['shop:shop']=1;
+    if(S.pubOpen||(inn('mossie','pub')&&by.mossie.awake&&pm>=t('09:45')))L['pub:bar']=1;
+    if(S.grillOpen||(inn('luciana','grill')&&/scrubbing|prep|kitchen/.test(by.luciana.act)))L['grill:shop']=1;
+    if(S.schoolIn||(inn('niamh','school')))L['school:class']=1;
+    if(S.garageOpen)L['garage:bay']=1}
+  if(S.savantOn)L['savant:study']=1;
+  return L}
+
+/* ================= background ================= */
+const HORIZ=116;
+const SKY=[[-18,[8,10,28],[14,18,44]],[-10,[12,18,48],[30,36,82]],[-5,[26,36,88],[112,84,130]],[-1.5,[52,78,146],[226,138,96]],[2,[88,134,204],[244,190,128]],[8,[92,160,226],[196,222,238]],[25,[78,152,226],[184,220,244]]];
+const mix=(a,b,f)=>[lerp(a[0],b[0],f),lerp(a[1],b[1],f),lerp(a[2],b[2],f)];
+const css=c=>'rgb('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+')';
+function skyCols(S){const a=S.sun.alt;let i=0;while(i<SKY.length-2&&a>SKY[i+1][0])i++;const k0=SKY[i],k1=SKY[i+1],f=clamp((a-k0[0])/(k1[0]-k0[0]),0,1);
+  const ov=smooth(0.45,0.92,S.wx.cloud)*0.88,n=S.night;
+  return{top:mix(mix(k0[1],k1[1],f),mix([128,140,152],[13,15,25],n),ov),bot:mix(mix(k0[2],k1[2],f),mix([176,186,194],[22,26,40],n),ov)}}
+function skyXY(alt,az){return{x:Math.round(vw/2+((az-180)/200)*vw*1.1-(camX+vw/2-W/2)*0.03),y:Math.round(HORIZ-Math.pow(clamp(alt/62,0,1),0.8)*(HORIZ-9))}}
+function glow(x,y,r,c,a){const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,rgba(c,a));gr.addColorStop(1,rgba(c,0));g.globalCompositeOperation='lighter';g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);g.globalCompositeOperation='source-over'}
+const STARS=[];{const r=rng(4242);for(let i=0;i<150;i++)STARS.push([r()*620,Math.floor(r()*r()*104),0.35+r()*0.65,r()<0.08])}
+const CLOUDS=[];{const r=rng(77);for(let i=0;i<12;i++)CLOUDS.push({u:r(),y:10+Math.floor(r()*58),s:0.8+r()*1.3,v:0.6+r()*0.9,th:(i+0.5)/12})}
+const ORION=[[-4,-7,'#ffc9a0'],[4,-6,'#ffffff'],[-2,1,'#ffffff'],[0,0,'#ffffff'],[2,-1,'#ffffff'],[-3,7,'#e8ecff'],[5,7,'#d8e4ff']];
+let hot={};
+function drawSky(S){
+  const sc=skyCols(S);S.sky=sc;
+  for(let i=0;i<14;i++){const y0=Math.round(i*HORIZ/14),y1=Math.round((i+1)*HORIZ/14);R(0,y0,vw,y1-y0,css(mix(sc.top,sc.bot,Math.pow(i/13,1.3))))}
+  R(0,HORIZ,vw,H-HORIZ,css(sc.bot));
+  const clear=1-smooth(0.3,0.85,S.wx.cloud),sa=clamp((S.night-0.5)/0.5,0,1)*clear;
+  if(sa>0.02){for(const s of STARS){const x=Math.round(((s[0]-camX*0.03)%(vw+30)+vw+30)%(vw+30));if(x>=vw)continue;g.fillStyle='rgba(255,255,255,'+(sa*s[2]).toFixed(2)+')';g.fillRect(x,s[1],1,1);if(s[3]){g.fillStyle='rgba(255,255,255,'+(sa*0.35).toFixed(2)+')';g.fillRect(x-1,s[1],3,1);g.fillRect(x,s[1]-1,1,3)}}
+    const o=altaz(S.ms,5.604/24*TAU,-1.2*RAD);if(o.alt>6){const p=skyXY(o.alt,o.az);g.globalAlpha=sa;for(const st of ORION)R(p.x+st[0],p.y+st[1],1,1,st[2]);g.globalAlpha=1}}
+  const dim=1-smooth(0.55,0.95,S.wx.cloud)*0.8;
+  hot.moon=null;
+  if(S.sun.alt>-4){const p=skyXY(Math.max(S.sun.alt,0),S.sun.az),low=smooth(10,0,S.sun.alt),c=css(mix([255,246,190],[255,170,90],low));
+    g.globalAlpha=dim;glow(p.x,p.y,22,'#fff0a0',0.35*dim);g.globalAlpha=dim;disc(p.x,p.y,5,c);g.globalAlpha=1}
+  if(S.moon.alt>-1){const p=skyXY(Math.max(S.moon.alt,0),S.moon.az),ph=S.moon.age*TAU,vis=lerp(0.35,1,S.night)*dim;
+    if(S.night>0.3)glow(p.x,p.y,17,'#cfd8ff',0.2*S.night*dim*S.moon.illum);
+    g.globalAlpha=vis;g.fillStyle='#f3f0dc';
+    for(let dy=-5;dy<=5;dy++){const hw=Math.sqrt(25-dy*dy+0.01),tx=hw*Math.cos(ph);let a,b;if(ph<PI){a=tx;b=hw}else{a=-hw;b=-tx}
+      const x0=Math.round(p.x+a),x1=Math.round(p.x+b);if(x1>=x0)g.fillRect(x0,p.y+dy,x1-x0+1,1)}
+    if(S.moon.illum>0.5){g.fillStyle='#d6d2bd';g.fillRect(p.x+1,p.y-2,2,1);g.fillRect(p.x+2,p.y+1,1,2);g.fillRect(p.x-1,p.y+2,2,1)}
+    g.globalAlpha=1;hot.moon={x:p.x,y:p.y}}
+  /* clouds drift with the wind, west to east: right to left as we look south */
+  const n=S.wx.cloud,span=vw+150,tw_=smooth(9,2,S.sun.alt)*smooth(-9,-2,S.sun.alt);
+  let cc=mix(mix([250,250,248],[150,158,168],smooth(0.5,0.95,n)),[36,42,66],S.night*0.93);cc=mix(cc,sc.bot,0.35*tw_);
+  const cd=css(mix(cc,[0,0,10],0.14)),cl=css(cc);
+  for(const c of CLOUDS){if(c.th>n*1.12)continue;const x=Math.round(span-((c.u*span+S.tsec*c.v*(1.0+S.wx.wind*3.6))%span)-75),s=c.s;
+    const pf=(cx,cy,r)=>{g.fillStyle=cl;for(let dy=-r;dy<=0;dy++){const hw=Math.round(Math.sqrt(r*r-dy*dy));g.fillRect(cx-hw,cy+dy,hw*2+1,1)}};
+    const b=c.y+Math.round(7*s),bh=Math.max(2,Math.round(2*s));pf(x-Math.round(8*s),b,Math.round(5*s));pf(x,b,Math.round(8*s));pf(x+Math.round(9*s),b,Math.round(6*s));pf(x+Math.round(4*s),b-Math.round(2*s),Math.round(6*s));
+    R(x-Math.round(14*s),b,Math.round(30*s),bh,cl);R(x-Math.round(12*s),b+bh,Math.round(26*s),1,cd)}
+}
+function farY(u){const m=(c,w,h)=>h*smooth(w*0.5,w*0.26,Math.abs(u-c));
+  return 106-Math.round((m(420,1100,22)+m(1750,900,15)+m(-650,800,13)+3*Math.sin(u/157)+2*Math.sin(u/53+1.7))/2)*2}
+function midY(u){return 115+Math.round(2.5*Math.sin(u/140)+1.5*Math.sin(u/47+2))}
+const midX=a=>Math.round((a-camX-vw/2)*0.4+vw/2);
+function drawFarMid(S){
+  const cc=camX+vw/2,win=S.D.mo>=11||S.D.mo<=2,gr=win?'#657f4c':S.D.mo>=9?'#6b8a48':'#5d9448',gd=shade(gr,-16);
+  for(let sx=0;sx<vw;sx++){const y=farY((sx-vw/2)/0.1+cc);R(sx,y,1,H-y,'#9aa3a6');R(sx,y,1,1,'#b6bdbe');R(sx,y+4,1,1,'#878f93');R(sx,y+9,1,1,'#878f93');R(sx,y+15,1,1,'#8b9397')}
+  if(S.wx.mist>0.02)R(0,60,vw,H-60,'rgba(226,230,232,'+(S.wx.mist*0.6).toFixed(2)+')');
+  for(let sx=0;sx<vw;sx++){const u=(sx-vw/2)/0.4+cc,y=midY(u),b=hash('hd',Math.floor(u/5))%6===0?1:0;R(sx,y-b,1,H-y+b,gr);R(sx,y-b,1,1+b,'#3f6238');
+    const f=Math.floor(u/2.5)%31;if(f===0)R(sx,y+1,1,22,gd);if((sx+Math.floor(cc*0.4))%2===0)R(sx,y+9,1,1,gd)}
+  /* trees on the skyline */
+  for(const a of[40,170,335,610,705,935,1030]){const x=midX(a),y=midY(a);if(x<-8||x>vw+8)continue;R(x,y-5,1,5,'#4a3a28');if(S.D.mo>=4&&S.D.mo<=10){disc(x,y-7,3,'#3a6a36');disc(x+1,y-8,2,'#4a7d42')}else{line(x,y-5,x-3,y-9,'#4a3a28');line(x,y-5,x+3,y-9,'#4a3a28');line(x,y-6,x,y-10,'#4a3a28')}}
+  /* the round tower, a little off true */
+  {const x=midX(835),y=midY(835);if(x>-6&&x<vw+6){R(x,y-9,3,10,'#8d8f8a');R(x+1,y-18,3,9,'#8d8f8a');R(x+1,y-20,3,2,'#6f716c');R(x+2,y-21,1,1,'#6f716c');R(x+2,y-15,1,1,'#3a3a3a')}}
+  /* a house out the road */
+  {const x=midX(230),y=midY(230);if(x>-10&&x<vw+10){R(x,y-4,8,5,'#e8e4da');R(x-1,y-6,10,2,'#525b63');R(x+2,y-2,2,2,'#2f3b48')}}
+  /* the turlough */
+  {const x=midX(474),L=S.tl,y=midY(474)+5;hot.tl={x,y:y+2};
+    if(L>0.08){const w=Math.round(24+L*46),h=Math.round(2+L*5),wc=css(mix(S.sky?mix(S.sky.bot,S.sky.top,0.35):[150,180,210],[70,104,140],0.45));
+      for(let i=0;i<h;i++){const f=Math.sin((i+0.5)/h*PI),ww=Math.round(w*(0.55+0.45*f));R(x-(ww>>1),y+i,ww,1,wc)}
+      R(x-(w>>2),y+1,Math.round(w*0.3),1,'rgba(255,255,255,0.35)');
+      if(L>0.4&&(S.D.mo>=10||S.D.mo<=4)){const n=3+Math.round(L*3);for(let i=0;i<n;i++){const sx=x+Math.round(Math.sin(S.tsec/47+i*2.1)*w*0.3+(i-n/2)*4),sy=y+(i%Math.max(1,h-1));R(sx,sy,3,1,'#f6f4ec');R(sx+(i%2?2:0),sy-2,1,2,'#f6f4ec')}}}
+    else{R(x-14,y+1,28,3,'#a8ae86');R(x-10,y+2,20,1,'#8f956e');R(x+3,y-2,1,3,'#8d949c');R(x+4,y-3,1,1,'#8d949c')}}
+}
+
+/* ================= props that stand in the street ================= */
+const WASH=[[3,'shirt','#f1ede2'],[9,'sheet','#bcd4e8'],[17,'sock','#c0392b'],[19,'sock','#c0392b'],[22,'towel','#e8a53a']];
+function drawGarden(S){
+  R(154,121,40,15,S.D.mo>=11||S.D.mo<=2?'#62864c':'#5f9448');
+  R(160,111,1,22,'#6b5a48');R(188,111,1,22,'#6b5a48');
+  for(let x=161;x<188;x++){const sag=Math.round(2*Math.sin((x-160)/28*PI));R(x,112+sag,1,1,'#d8d4c8')}
+  if(S.wash.out){const wet=S.wet,wd=wet?0:S.wx.wind;
+    for(let i=0;i<WASH.length;i++){const it=WASH[i],x=161+it[0],sag=Math.round(2*Math.sin((it[0]+1)/28*PI)),y=113+sag,sw=Math.sin(S.tsec*(1.3+wd)+i*1.7)*wd*2.4;
+      let c=it[2];if(wet)c=shade(c,-26);
+      const wdt=it[1]==='sheet'?7:it[1]==='shirt'?5:it[1]==='towel'?4:1,hh=it[1]==='sheet'?9:it[1]==='shirt'?7:it[1]==='towel'?8:4;
+      for(let r=0;r<hh;r++){const off=Math.round(sw*(r/hh));R(x+off,y+r,wdt,1,c)}
+      if(it[1]==='shirt'){R(x-1+Math.round(sw*0.2),y+1,1,3,c);R(x+5+Math.round(sw*0.2),y+1,1,3,c)}
+      if(it[1]==='towel')for(let r=1;r<hh;r+=3)R(x+Math.round(sw*(r/hh)),y+r,wdt,1,shade(c,-40))}}
+}
+function drawPitch(S){
+  R(916,117,102,19,'#4f8f45');for(let k=0;k<9;k++)R(918+k*12,117,6,19,'#57994c');R(916,117,102,1,'#3f7a3a');
+  R(940,84,1,44,'#f1ede2');R(954,84,1,44,'#f1ede2');R(940,110,15,1,'#f1ede2');g.fillStyle='rgba(240,240,236,0.5)';for(let y=112;y<128;y+=2)for(let x=942;x<954;x+=2)g.fillRect(x,y,1,1);
+  R(978,112,16,16,'#e8e4da');R(977,109,18,3,'#7b1e3a');R(984,119,4,9,'#7b1e3a');
+  R(1002,72,1,57,'#3a3f44');R(999,70,7,3,'#c9cdd2');
+  if(S.training||S.match){const m=S.match,n=m?11:5,rv=matchResult(S.pd),oc=['#2a4fa0','#1f8a4c','#e8e4da','#c0392b','#f2c230'][hash(rv.opp)%5];
+    for(let i=0;i<n;i++){const sp=7+(hash('pl',i)%9),ph=hash('pp',i)%97,span=78,q=(S.tsec*sp+ph*9)%(span*2),x=922+Math.round(q<span?q:span*2-q),y=121+(hash('py',i)%7),run=Math.floor(S.tsec*5+i)&1;
+      const c=m?(i===10?'#16161a':i%2?oc:'#7b1e3a'):['#7b1e3a','#f2c230','#e07a9a','#2a4fa0','#3aa85a'][i%5],kid=!m;
+      R(x,y-(kid?6:8),2,2,'#e8b894');R(x,y-(kid?4:6),2,kid?2:3,c);R(x+(run?0:1),y-(kid?2:3),1,kid?2:3,'#e8e4da');R(x+(run?1:0),y-(kid?2:3),1,kid?1:2,'#e8e4da');R(x+2,y-(kid?7:9),1,3,'#d9c08a')}
+    const bx=922+Math.round(((S.tsec*23)%156<78)?(S.tsec*23)%156:156-(S.tsec*23)%156),by=116-Math.round(Math.abs(Math.sin(S.tsec*1.3))*14);R(bx,by,1,1,'#ffffff')}
+}
+function drawField(S){
+  R(1016,119,84,17,S.D.mo>=11||S.D.mo<=2?'#62864c':'#5f9448');R(1078,125,10,3,'#6a6f73');R(1079,126,8,1,'#4a7a9a');
+  for(const e of S.ents){if(e.v.sprite!=='cow'||e.place!=='field'||e.moving)continue;const k=e.v.k,x=1046+k*9+Math.round(Math.sin(S.tsec/60+k*1.9)*3),d=k%2?1:-1;drawCow(x,132-(k%3),d,0,ID,k,false)}
+}
+function drawSquare(S){
+  /* noticeboard, pump, bench, sycamore, bus stop */
+  R(437,122,1,14,'#4a3420');R(446,122,1,14,'#4a3420');R(436,117,12,10,'#2e5a3e');R(437,118,10,8,'#d9d2bc');R(438,119,3,3,'#f1ede2');R(442,119,4,2,'#e8c8a8');R(439,123,4,2,'#f1ede2');R(444,122,2,3,'#bcd4e8');
+  R(450,122,4,14,'#2e6b4a');R(449,121,6,2,'#24573b');R(451,119,2,2,'#2e6b4a');R(454,124,3,1,'#24573b');R(456,124,1,4,'#24573b');R(448,127,2,1,'#24573b');R(448,135,8,1,'#8f918b');
+  R(461,131,17,1,'#6b4a2a');R(462,132,1,4,'#4a3420');R(476,132,1,4,'#4a3420');R(461,127,17,1,'#6b4a2a');R(461,128,1,3,'#4a3420');R(477,128,1,3,'#4a3420');
+  const mo=S.D.mo,d=S.D.d,sw=Math.round(Math.sin(S.tsec*0.7)*S.wx.wind*1.8),br='#5a4028';
+  R(489,106,3,30,br);R(488,132,5,4,br);line(490,110,481,97,br);line(490,108,500,95,br);line(490,106,490,84,br);line(484,101,477,93,br);line(497,99,504,90,br);line(490,94,484,84,br);line(490,92,497,82,br);
+  const leaf=(cs,sc)=>{const D2=[[490,88,12],[480,95,8],[500,94,8],[486,80,7],[497,81,7],[476,90,5],[505,88,5]];for(let i=0;i<D2.length;i++){const q=D2[i];disc(q[0]+(q[1]<92?sw:0),q[1],Math.round(q[2]*sc),cs[i%cs.length])}};
+  if(mo>=4&&mo<=9)leaf(['#3f7a3a','#4a8a44','#57994c'],mo===4?0.8:1);
+  else if(mo===10)leaf(['#c98a2a','#d9a03a','#b86a22'],0.95);
+  else if(mo===11&&d<=18)leaf(['#c98a2a','#b86a22'],0.5);
+  else{line(481,97,476,95,br);line(500,95,506,93,br);line(490,84,487,79,br);line(490,84,493,78,br);line(477,93,474,88,br);line(504,90,508,85,br);line(484,84,481,80,br);line(497,82,500,77,br)}
+  if(S.xmas)for(let i=0;i<9;i++)R(480+((i*7)%22),88+((i*5)%16),1,1,['#e23b3b','#f2c230','#3aa85a','#3d6ad8'][(i+S.tick4)%4]);
+  R(514,104,1,32,'#8a8f93');R(515,104,7,7,'#22324f');R(516,105,5,5,'#f1ede2');R(517,106,3,3,'#c2281e');
+  if(S.bunting){const cs=S.bunting===2?['#1f8a4c','#f1ede2','#e08a2a']:['#e23b3b','#f2c230','#3d6ad8','#3aa85a','#f1ede2'];for(let x=418;x<527;x++){const y=98+Math.round(5*Math.sin((x-418)/109*PI));R(x,y,1,1,'#3a3a3a');if((x-418)%6===2){const c=cs[((x-418)/6|0)%cs.length];R(x-1,y+1,3,1,c);R(x-1,y+2,3,1,c);R(x,y+3,1,1,c)}}}
+  if(S.halloween)for(const x of[364,300,570,655,711]){R(x+12,132,4,4,'#e07a1e');R(x+13,131,2,1,'#3f6a3a')}
+}
+function drawStreetBits(S){
+  for(const x of LAMPS)lampPost(x);
+  R(1052,100,1,36,'#3a3a3a');R(1053,100,43,9,'#f1ede2');R(1096,102,1,5,'#f1ede2');R(1097,104,1,1,'#f1ede2');txt(1055,102,'KINVARA 12','#1c1c20');
+  /* crows on the ridges by day */
+  if(S.sun.alt>-2){const h=Math.floor(S.ms/HOUR);for(let i=0;i<5;i++){const spots=[[352,63],[388,63],[404,54],[746,89],[800,89],[214,63],[280,66],[636,43],[664,73],[558,77]],s=spots[hash('crow',h,i)%spots.length];R(s[0]+i,s[1]-2,2,2,'#16161a');R(s[0]+i+(i%2?2:-1),s[1]-2,1,1,'#16161a')}}
+}
+function drawGround(S){
+  const wet=S.wet;R(0,GY,W,6,wet?'#99978f':'#a9a69c');for(let x=4;x<W;x+=9)R(x,GY+1,1,4,wet?'#8a887f':'#98958b');
+  R(0,GY+5,W,1,'#84817a');R(0,GY+6,W,18,wet?'#57575c':'#6f6c68');
+  if(wet)for(let i=0;i<60;i++){const x=hash('pu',i)%W,y=GY+8+(hash('pv',i)%14);R(x,y,4+(i%5),1,'#727a86')}
+  R(878,148,6,2,'#3f3d3b');R(879,147,4,1,'#4a4846');
+  R(0,GY+24,W,8,S.D.mo>=11||S.D.mo<=2?'#5f8449':'#5b8f46');for(let x=0;x<W;x+=3){const h=hash('tf',x)%5;if(h<2)R(x,GY+23-h,1,1+h,'#4f7d3d');if(S.D.mo>=4&&S.D.mo<=8&&hash('fl',x)%9===0)R(x+1,GY+26+(x%3),1,1,x%2?'#f1ede2':'#f2c230')}
+}
+function railings(x0,x1){R(x0,123,x1-x0,1,'#2f3438');for(let x=x0;x<x1;x+=3)R(x,123,1,13,'#2f3438');R(x0,134,x1-x0,1,'#2f3438')}
+const SMOKE=[[103,81,S=>S.by.maureen.home&&S.by.maureen.awake&&S.wx.temp<15],[345,54,S=>S.lit['pub:bar']&&S.wx.temp<16],[407,54,S=>S.lit['pub:bar']&&S.wx.temp<12],[203,54,S=>S.by.tom.home&&S.by.tom.awake&&S.pm>=t('17:00')&&S.wx.temp<14],[271,57,S=>S.by.nuala.home&&S.by.nuala.awake&&S.wx.temp<12],[577,68,S=>S.grillOpen],[601,34,S=>S.savantOn],[684,64,S=>S.lit['terB:down']&&S.wx.temp<13]];
+function drawSmoke(S){const n=S.night,c=css(mix([214,214,218],[110,116,146],n)),wd=-(S.wx.wind*16+2);
+  for(const s of SMOKE){if(s[0]<camX-30||s[0]>camX+vw+30)continue;let on=false;try{on=s[2](S)}catch(e){}if(!on)continue;
+    for(let i=0;i<6;i++){const a=((S.tsec/5.5)+i/6)%1,x=s[0]+Math.round(wd*a*a+Math.sin(a*7+i)*1.4),y=s[1]-Math.round(a*17),z=1+Math.round(a*2.4);g.globalAlpha=(1-a)*0.55;R(x,y,z,z,c)}g.globalAlpha=1}}
+
+/* ================= lights ================= */
+let LIGHTS=[];
+function drawLights(S){
+  LIGHTS=[];const a=Math.max(S.night,S.dull?0.4:0);if(a<0.03&&!S.savantOn)return;
+  const vis=(x,w)=>x+w>camX-50&&x<camX+vw+50;
+  for(const wn of WIN){if(!S.lit[wn.room])continue;const c=wn.col,cx=wn.x+(wn.w>>1),cy=wn.y+(wn.h>>1);
+    if(wn.ground)LIGHTS.push({x:cx,r:22+wn.w,s:(wn.kind==='sash'?0.5:0.85)*a});
+    if(!vis(wn.x,wn.w))continue;
+    if(wn.kind==='bay'){g.globalAlpha=0.5*a;g.globalCompositeOperation='lighter';R(wn.x,wn.y,wn.w,wn.h,c);g.globalCompositeOperation='source-over';g.globalAlpha=1}
+    else{g.globalAlpha=lerp(0.6,1,a);R(wn.x,wn.y,wn.w,wn.h,c);const dk=shade(c,-95);
+      if(wn.kind==='sash'||wn.kind==='attic'){R(wn.x,wn.y,1,wn.h,shade(c,-45));R(wn.x+wn.w-1,wn.y,1,wn.h,shade(c,-45));R(wn.x,wn.y+(wn.h>>1),wn.w,1,dk);R(wn.x+(wn.w>>1),wn.y,1,wn.h,dk)}
+      else if(wn.kind==='shop'){R(wn.x+1,wn.y+6,wn.w-2,1,shade(c,-60));for(let k=wn.x+3;k<wn.x+wn.w-3;k+=4)R(k,wn.y+3+(k%3),2,3-(k%3),shade(c,-70-(k%2)*30));R(wn.x+2,wn.y+10,wn.w-4,3,shade(c,-40));for(let k=wn.x+9;k<wn.x+wn.w-2;k+=10)R(k,wn.y,1,wn.h,dk)}
+      else if(wn.kind==='pub'){R(wn.x,wn.y+8,wn.w,wn.h-8,shade(c,-28));const n=Math.min(3,Math.ceil(S.inPub.length/3));for(let i=0;i<n;i++){const hx=wn.x+2+i*6+(wn.x%3),bob=Math.round(Math.sin(S.tsec*1.1+i*2+wn.x)*0.6);R(hx+1,wn.y+2+bob,3,3,'#3a2416');R(hx,wn.y+5+bob,5,3,'#3a2416')}R(wn.x,wn.y+7,wn.w,1,dk);for(let k=wn.x+9;k<wn.x+wn.w-2;k+=10)R(k,wn.y,1,wn.h,dk)}
+      g.globalAlpha=1}
+    glow(cx,cy,9+Math.max(wn.w,wn.h),c,0.2*a);
+    if(wn.ground){g.globalCompositeOperation='lighter';R(wn.x-2,GY,wn.w+4,3,rgba(c,0.2*a));R(wn.x-5,GY+3,wn.w+10,4,rgba(c,0.11*a));R(wn.x-8,GY+7,wn.w+16,5,rgba(c,0.05*a));g.globalCompositeOperation='source-over'}}
+  if(S.dark){
+    for(const x of LAMPS){LIGHTS.push({x:x+3,r:34,s:0.7*S.night});if(!vis(x-30,60))continue;R(x+2,99,3,2,'#ffe2b0');glow(x+3,102,30,'#ffb866',0.3*S.night);g.globalCompositeOperation='lighter';R(x-11,GY+1,29,4,rgba('#ffb866',0.1*S.night));R(x-7,GY+5,21,6,rgba('#ffb866',0.07*S.night));g.globalCompositeOperation='source-over'}
+    if(vis(232,3)){R(232,111,3,4,'#7fa6ff');glow(233,113,11,'#4a7cff',0.45*S.night)}
+    if((S.training||S.match)&&vis(916,102)){R(999,70,7,3,'#ffffff');glow(1002,74,70,'#f4f8ff',0.4*S.night);g.globalCompositeOperation='lighter';R(916,117,102,12,rgba('#dfffe0',0.16*S.night));g.globalCompositeOperation='source-over';LIGHTS.push({x:965,r:60,s:0.5*S.night})}
+    {const x=midX(230)+camX,y=midY(230);if(S.pm<t('23:20')&&S.pm>t('06:30')&&!BLD.some(b=>x>=b.x-4&&x<=b.x+b.w+4)){R(x+2,y-2,2,2,'#ffcf78');glow(x+3,y-1,5,'#ffcf78',0.3)}}
+    if(S.xmas){for(let k=338;k<414;k+=4){const c=['#ff5a5a','#ffd84a','#5ad87a','#6a8aff'][((k>>2)+S.tick4)%4];R(k,115,1,1,c)}for(let i=0;i<9;i++)R(480+((i*7)%22),88+((i*5)%16),1,1,['#ff5a5a','#ffd84a','#5ad87a','#6a8aff'][(i+S.tick4)%4])}
+    if(S.halloween)for(const x of[364,300,570,655,711]){R(x+13,133,1,1,'#ffd84a');R(x+15,133,1,1,'#ffd84a');R(x+13,135,3,1,'#ffd84a')}
   }
-  requestAnimationFrame(frame);
-})();
+}
+function lightAt(x){let m=0;for(const l of LIGHTS){const v=l.s*(1-Math.abs(x-l.x)/l.r);if(v>m)m=v}return m}
+const _tc=new Map();
+function tinter(S,x){const nq=Math.round(S.night*16),lq=Math.round(clamp(lightAt(x),0,1)*6);
+  return function(c){const k=c+nq+'_'+lq;let v=_tc.get(k);if(v)return v;const n=nq/16,l=lq/6;
+    const r=parseInt(c.slice(1,3),16),gg=parseInt(c.slice(3,5),16),b=parseInt(c.slice(5,7),16);
+    const fr=lerp(lerp(1,0.2,n),1,l*n),fg=lerp(lerp(1,0.25,n),0.86,l*n),fb=lerp(lerp(1,0.46,n),0.62,l*n);
+    v='rgb('+(r*fr|0)+','+(gg*fg|0)+','+(b*fb|0)+')';if(_tc.size>6000)_tc.clear();_tc.set(k,v);return v}}
+function drawRain(S){const r=S.wx.rain;if(r<=0)return;const n=Math.round((28+r*110)*vw/200),sp=120+r*80,sl=0.22+S.wx.wind*0.3,span=vw+70;
+  g.fillStyle=S.night>0.5?'rgba(170,186,222,0.36)':'rgba(238,244,250,0.55)';
+  for(let i=0;i<n;i++){const ph=RN[i%RN.length],yy=((S.tsec*sp*(0.8+ph[1]*0.4)+ph[1]*500)%(H+12))-6,x=(((ph[0]*span+yy*sl)%span)+span)%span-35;g.fillRect(Math.round(x),Math.round(yy),1,r>0.5?4:3)}}
+const RN=[];{const r=rng(99);for(let i=0;i<400;i++)RN.push([r(),r()])}
+/* ================= stage, camera, time ================= */
+const $=id=>document.getElementById(id);
+const stage=$('stage'),cv=$('cv'),mctx=cv.getContext('2d'),mini=$('mini'),nctx=mini.getContext('2d');
+const layer=document.createElement('canvas'),lctx=layer.getContext('2d'),mask=document.createElement('canvas'),kctx=mask.getContext('2d');
+const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let cssScale=2,HITS=[],cur=null,live=true,simMs=Date.now(),rate=0,vel=0;
+const simNow=()=>live?Date.now():simMs;
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function fit(){
+  const dpr=window.devicePixelRatio||1,cw=stage.clientWidth||320,vh=window.innerHeight||700;
+  let ds=Math.max(2,Math.round(clamp(vh*0.56,250,640)*dpr/H));
+  while(ds>2&&cw*dpr/ds<150)ds--;
+  cssScale=ds/dpr;const centre=camX+vw/2;vw=Math.min(W,Math.ceil(cw/cssScale));
+  for(const c of[cv,layer,mask]){c.width=vw;c.height=H}
+  cv.style.width=(vw*cssScale)+'px';cv.style.height=(H*cssScale)+'px';
+  camX=clamp(Math.round(centre-vw/2),0,W-vw);
+  mini.width=Math.round((mini.clientWidth||cw)*dpr);mini.height=Math.round(16*dpr)}
+
+/* ================= one frame ================= */
+function render(S){
+  HITS=[];
+  g=mctx;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';
+  drawSky(S);
+  g=lctx;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,vw,H);
+  drawFarMid(S);
+  g.setTransform(1,0,0,1,-camX,0);
+  const x0=camX-100,x1=camX+vw+100;
+  drawGarden(S);drawPitch(S);drawField(S);
+  for(const b of BLD)if(b.x+b.w>x0&&b.x<x1)b.draw(S);
+  for(const e of S.ents){if(!e.layer||e.far||e.hidden||e.moving)continue;let x=e.x,dir=1,mv=false,dist=0;
+    if(e.play){const ph=hash(e.v.id)%100;x+=Math.sin(S.tsec*0.9+ph)*7+Math.sin(S.tsec*2.1+ph*2)*2;dir=Math.cos(S.tsec*0.9+ph)>0?1:-1;mv=true;dist=S.tsec*14+ph}
+    drawPerson(x,134,e.v,{dir,moving:mv,dist,carry:e.carry},ID);HITS.push({x0:x-5,x1:x+5,y0:114,y1:136,type:'ent',ref:e})}
+  stoneWall(0,6,129);stoneWall(154,194,129);stoneWall(256,262,127);stoneWall(330,336,127);stoneWall(416,528,130);stoneWall(642,646,127);stoneWall(722,730,127);
+  railings(818,846);stoneWall(912,1016,129);stoneWall(1016,1024,129);gate(1024,1040,S.cowsMoving);stoneWall(1040,W,129);
+  drawSquare(S);drawStreetBits(S);drawGround(S);
+  /* night falls on everything that is not sky */
+  g.setTransform(1,0,0,1,0,0);kctx.clearRect(0,0,vw,H);kctx.drawImage(layer,0,0);
+  const n=S.night,dim=1-0.16*smooth(0.6,1,S.wx.cloud)*(1-n)-0.1*S.wx.rain*(1-n),gold=smooth(10,1,S.sun.alt)*smooth(-7,0,S.sun.alt)*(1-S.wx.cloud*0.8);
+  g.globalCompositeOperation='multiply';R(0,0,vw,H,'rgb('+Math.round(255*lerp(1,0.2,n)*dim)+','+Math.round(255*lerp(1,0.25,n)*dim*lerp(1,0.88,gold))+','+Math.round(255*lerp(1,0.46,n)*dim*lerp(1,0.72,gold))+')');
+  g.globalCompositeOperation='destination-in';g.drawImage(mask,0,0);g.globalCompositeOperation='source-over';
+  g=mctx;g.drawImage(layer,0,0);
+  g.setTransform(1,0,0,1,-camX,0);
+  drawSmoke(S);drawLights(S);drawStreet(S);
+  g.setTransform(1,0,0,1,0,0);
+  if(!reduced)drawRain(S);
+  if(S.wx.mist>0.02)R(0,0,vw,H,'rgba(226,230,232,'+(S.wx.mist*0.2).toFixed(2)+')');
+}
+const CATSPOTS=[[644,127],[604,128],[393,131],[172,129],[470,131],[618,136],[727,127]];
+const BUB=[],greeted=new Map();
+const GREET={any:[['WELL.','WELL.'],["HOW'S THE FORM?",'NOT A BOTHER.'],['ANY NEWS?','DIVIL A BIT.'],["HOW'S SHE CUTTING?",'AH, SURE.'],['WELL?','GRAND.']],
+  rain:[['SOFT DAY.','THANK GOD.'],['DESPERATE.',"'TIS."]],night:[['NIGHT NOW.','SAFE HOME.'],['GOOD LUCK.','GOD BLESS.']],cold:[['FRESH.',"'TIS FRESH."]],day:[['GRAND DAY.',"'TIS."]]};
+function drawStreet(S){
+  const items=[],people=[],rain=S.wx.rain>0;
+  const push=(y,fn)=>items.push({y,fn});
+  const bk=S.bike;
+  if(!bk.riding){const y=bk.self?150:137;push(y,()=>drawBike(bk.x,y,bk.dir,bk.dist,tinter(S,bk.x),null));HITS.push({x0:bk.x-9,x1:bk.x+9,y0:y-12,y1:y+1,type:'bike'})}
+  for(const o of S.buses){push(157,()=>{drawBus(o.x,157,o.b.dir,tinter(S,o.x),o.b);if(S.dark)glow(Math.round(o.x+o.b.dir*38),150,16,'#ffe9a0',0.35)});HITS.push({x0:o.x-30,x1:o.x+30,y0:133,y1:158,type:'bus',ref:o.b})}
+  /* the cat, and by day the hens */
+  {const c=CATSPOTS[hash('cat',Math.floor(S.ms/(3*HOUR)))%CATSPOTS.length],fl=hash('catf',Math.floor(S.ms/(3*HOUR)))%2===0;
+    push(c[1]-0.5,()=>{bmp(CATB,c[0]-3,c[1]-7,CATP,fl,tinter(S,c[0]));if(S.night>0.5)R(fl?c[0]-2:c[0]+1,c[1]-5,1,1,'#f2e860')});HITS.push({x0:c[0]-4,x1:c[0]+4,y0:c[1]-8,y1:c[1],type:'cat'})}
+  if(S.sun.alt>1&&!rain)for(let i=0;i<3;i++){const x=Math.round(104+i*15+Math.sin(S.tsec/9+i*2.2)*8),y=138+(i%2)*2,peck=Math.sin(S.tsec*1.7+i*3)>0.6?1:0,fl=Math.cos(S.tsec/9+i*2.2)<0;
+    push(y,()=>{bmp(HENB,x-2,y-5+peck,HENP,fl,tinter(S,x));R(x,y-1,1,1,'#e0a030')});HITS.push({x0:x-3,x1:x+3,y0:y-6,y1:y,type:'hen'})}
+  for(const e of S.ents){
+    if(e.hidden||(e.layer&&!e.moving))continue;const v=e.v;let x=e.x,y,dir=e.dir||1,moving=e.moving,dist=e.dist||0;
+    if(v.sprite==='cow'){y=143+((v.k*3)%10);push(y,()=>drawCow(x,y,dir,dist,tinter(S,x),v.k,moving));HITS.push({x0:x-9,x1:x+9,y0:y-13,y1:y+1,type:'ent',ref:e});continue}
+    if(v.sprite==='fox'){y=149;push(y,()=>drawFox(x,y,dir,dist,tinter(S,x),moving));HITS.push({x0:x-8,x1:x+8,y0:y-8,y1:y+1,type:'ent',ref:e});continue}
+    if(v.sprite==='dog'){let lying=!moving;y=moving?147:138;
+      if(e.play){const ph=31;x+=Math.sin(S.tsec*1.1+ph)*18+Math.sin(S.tsec*2.3)*5;dir=Math.cos(S.tsec*1.1+ph)>0?1:-1;moving=true;lying=false;dist=S.tsec*20;y=144+Math.round(Math.sin(S.tsec*1.7)*3)}
+      const xx=x,dd=dir,mm=moving,di=dist;push(y,()=>drawDog(xx,y,dd,di,tinter(S,xx),mm,lying));HITS.push({x0:x-6,x1:x+6,y0:y-8,y1:y+1,type:'ent',ref:e});continue}
+    if(moving&&e.mode==='tractor'){y=155;push(y,()=>{drawTractor(x,y,dir,dist,tinter(S,x),v);if(S.dark)glow(Math.round(x+dir*20),y-9,14,'#ffe9a0',0.35)});HITS.push({x0:x-14,x1:x+14,y0:y-22,y1:y+1,type:'ent',ref:e});continue}
+    if(moving&&e.mode==='bike'){y=151;push(y,()=>drawBike(x,y,dir,dist,tinter(S,x),v,{}));HITS.push({x0:x-9,x1:x+9,y0:y-22,y1:y+1,type:'ent',ref:e});people.push({e,x,y:y-4});continue}
+    const lane=139+(hash(v.id)%10);
+    if(moving){const a=Math.min(Math.abs(x-e.from),Math.abs(e.to-x));y=Math.round(lerp(138,lane,smooth(0,12,a)))}
+    else if(e.sit){y=136;dir=hash(v.id,'sd')%2?1:-1}
+    else if(e.play){const ph=hash(v.id)%100;x+=Math.sin(S.tsec*0.8+ph)*16+Math.sin(S.tsec*1.9+ph*2)*5;dir=Math.cos(S.tsec*0.8+ph)>0?1:-1;moving=true;dist=S.tsec*15+ph;y=144+Math.round(Math.sin(S.tsec*1.3+ph)*3)}
+    else{y=138+(hash(v.id,'sy')%2);dir=(Math.floor(S.tsec/7+hash(v.id)%7)%3===0)?-1:1}
+    const st={dir,moving,dist,sit:e.sit,carry:e.carry,umb:rain&&!e.sit,bag:!!v.kid&&moving&&!e.play&&schoolDay(S.D)&&S.pm<t('15:10')};
+    const xx=x;push(y,()=>drawPerson(xx,y,v,st,tinter(S,xx)));
+    HITS.push({x0:x-6,x1:x+6,y0:y-(v.kid?16:20),y1:y+2,type:'ent',ref:e});people.push({e,x,y})}
+  items.sort((a,b)=>a.y-b.y);for(const it of items)it.fn();
+  /* passing greetings */
+  const nowR=performance.now();
+  if(live||rate<=1)for(let i=0;i<people.length;i++)for(let j=i+1;j<people.length;j++){const a=people[i],b=people[j];
+    if(a.e.v.animal||b.e.v.animal||(a.e.v.kid&&b.e.v.kid)||a.e.play||b.e.play)continue;
+    if(Math.abs(a.x-b.x)>10||(!a.e.moving&&!b.e.moving))continue;
+    const k=a.e.v.id+'|'+b.e.v.id;if((greeted.get(k)||0)>nowR)continue;greeted.set(k,nowR+120000);
+    const pool=rain?GREET.rain.concat(GREET.any):S.dark&&S.pm>t('21:00')?GREET.night.concat(GREET.any):S.wx.temp<3?GREET.cold.concat(GREET.any):GREET.any.concat(GREET.day);
+    const gr=pool[hash(k,Math.floor(S.ms/60000))%pool.length];
+    BUB.push({id:a.e.v.id,text:gr[0],t0:nowR,t1:nowR+2700});BUB.push({id:b.e.v.id,text:gr[1],t0:nowR+950,t1:nowR+3600})}
+  for(let i=BUB.length-1;i>=0;i--){const b=BUB[i];if(nowR>b.t1){BUB.splice(i,1);continue}if(nowR<b.t0)continue;const p=people.find(q=>q.e.v.id===b.id);if(!p)continue;
+    const w=tw(b.text)+4,bx=clamp(Math.round(p.x-w/2),camX+1,camX+vw-w-1),by=p.y-(p.e.v.kid?16:20)-12;
+    R(bx-1,by-1,w+2,11,'#1c1c20');R(bx,by,w,9,'#fbfaf4');R(Math.round(p.x),by+9,1,2,'#1c1c20');txt(bx+2,by+2,b.text,'#1c1c20')}
+}
+
+/* ================= cards: tap anyone, or anything ================= */
+const card=$('card');let cardAnchor=null,tapN=0;
+function showCard(o,anchor){
+  card.textContent='';const h=document.createElement('h3');h.textContent=o.title;card.appendChild(h);
+  if(o.role){const r=document.createElement('p');r.className='role';r.textContent=o.role;card.appendChild(r)}
+  for(const l of(o.lines||[])){if(!l)continue;const p=document.createElement('p');p.textContent=l;card.appendChild(p)}
+  if(o.say){const p=document.createElement('p');p.className='say';p.textContent=o.say;card.appendChild(p)}
+  if(o.btn){const b=document.createElement('button');b.type='button';b.textContent=o.btn.label;b.addEventListener('click',ev=>{ev.stopPropagation();o.btn.fn()});card.appendChild(b)}
+  card.hidden=false;cardAnchor=anchor;placeCard()}
+function hideCard(){card.hidden=true;cardAnchor=null}
+function placeCard(){if(card.hidden||!cardAnchor)return;let ax=cardAnchor.x,ay=cardAnchor.y;
+  if(cardAnchor.id&&cur){const e=cur.by[cardAnchor.id];if(!e||e.hidden){hideCard();return}const hit=HITS.find(h=>h.type==='ent'&&h.ref.v.id===cardAnchor.id);if(hit){ax=(hit.x0+hit.x1)/2;ay=hit.y0}}
+  const sx=(cardAnchor.screen?ax:ax-camX)*cssScale,sy=ay*cssScale,cw=card.offsetWidth,ch=card.offsetHeight,sw=stage.clientWidth,sh=stage.clientHeight;
+  let left=clamp(sx-cw/2,6,sw-cw-6),top=sy-ch-10;if(top<46)top=(cardAnchor.id||cardAnchor.small)?Math.min(sh-ch-6,sy+(cardAnchor.h||24)*cssScale+8):46;
+  card.style.left=Math.round(left)+'px';card.style.top=Math.round(Math.max(6,top))+'px'}
+const WXLINES={rain:["Soft day, thank God.","It's only a shower.","That's down for the day."],night:["Night now.","Safe home."],cold:["Fresh.","There's a bite in it."]};
+function entCard(e,S){const v=e.v;tapN++;let say=v.lines[hash(v.id,tapN,Math.floor(Date.now()/30000))%v.lines.length];
+  if(!v.animal&&tapN%4===0){const p=S.wx.rain>0?WXLINES.rain:S.dark&&S.pm>t('22:00')?WXLINES.night:S.wx.temp<3?WXLINES.cold:null;if(p)say=p[tapN%p.length]}
+  if(v.id==='tom'&&/bicycle/.test(e.act))say='I left it at the barracks. I am certain of that much.';
+  return{title:v.name,role:v.role,lines:[(v.animal?'':'Now: ')+cap(e.act)+'.'],say:v.animal?say:'“'+say+'”'}}
+function inside(S,places){const a=S.ents.filter(e=>e.hidden&&places.indexOf(e.place)>=0&&!e.v.animal);if(!a.length)return'Nobody in.';
+  const nm=a.map(e=>e.v.extra?e.v.name.charAt(0).toLowerCase()+e.v.name.slice(1):e.v.name.replace('Sgt. ','').replace('Garda ','').split(' ')[0]);
+  return'Inside: '+(nm.length>4?nm.slice(0,4).join(', ')+' and '+NUM[nm.length-4]+' more':nm.join(', '))+'.'}
+function nextMatch(pd){for(let d=pd;d<pd+40;d++)if(matchDay(dinfo(d)))return d;return null}
+function bldCard(b,S){const D=S.D,pm=S.pm,o={title:b.name,lines:[]};
+  if(b.id==='farm'){o.role='Six cows, one collie, one tractor.';o.lines.push(cowSeason(D)?'Milking at twenty past seven and twenty to five. The cows walk down the street for it.':'The cows are in for the winter. They have views on this.');o.lines.push(S.tractorHome?'The tractor is in. Her name is No Hurry Whatsoever.':'The tractor is out.');o.lines.push('Jimmy: '+S.by.jimmy.act+'.')}
+  else if(b.id==='cottage'){o.role='Thatched. Whitewashed every May.';o.lines.push('Maureen: '+S.by.maureen.act+'.');o.lines.push(washLine(S))}
+  else if(b.id==='garda'){o.role='Garda station. If the door is shut, knock.';o.lines.push(inside(S,['garda']));o.lines.push(S.bike.riding?'The bicycle is out with the Sergeant.':S.bike.self?'The bicycle is not here.':Math.abs(S.bike.x-RACK)<2?'The bicycle is at the wall, where it was left.':'The bicycle is not where it was left.')}
+  else if(b.id==='shop'){const h=shopHours(D);o.role='Shop and post office.';o.lines.push(S.shopOpen?'Open until '+clock(h.close)+'.':(h.lunch&&pm>=h.lunch[0]&&pm<h.lunch[1])?'Closed for dinner until two. It is your own fault.':pm<h.open?'Closed. Opens at '+clock(h.open)+'.':'Closed.');o.lines.push(inside(S,['shop']))}
+  else if(b.id==='pub'){const h=pubHours(D),ses=sessionTimes(D);o.role='Est. 1887. Not a cocktail sort of a house.';o.lines.push(S.pubOpen?'Open until '+clock(h.close)+'.':pm<h.open?'Closed. Opens at '+clock(h.open)+'.':'Closed. Time was called.');o.lines.push(inside(S,['pub']));
+    if(S.session){o.lines.push('There is a session on. Paddy Glynn has the fiddle.');o.btn=Snd.on?{label:Snd.inside?'Step back outside':'Go inside',fn(){Snd.inside=!Snd.inside;hideCard()}}:{label:'Listen at the door',fn(){soundOn(true);hideCard()}}}
+    else if(ses&&pm<ses.start)o.lines.push('Session tonight from '+clock(ses.start)+'.')}
+  else if(b.id==='grill'){const h=grillHours(D);o.role='Chips, burgers, and pão de queijo on Fridays.';o.lines.push(!h?'Closed Mondays. This is discovered weekly.':S.grillOpen?'Open until '+clock(h.close)+'.':'Closed just now.');o.lines.push(inside(S,['grill']))}
+  else if(b.id==='savant'){o.role='Nobody has seen him. The post is taken in.';o.lines.push(S.savantOn?'There is a light in the top window.':'No light in the top window.');o.lines.push('He is said to hold '+THEORIES[(S.pd*4)%THEORIES.length]+'.')}
+  else if(b.id==='terA'||b.id==='terB'){o.lines.push(inside(S,[b.id]))}
+  else if(b.id==='school'){o.role='Two rooms, one teacher, twenty-three pupils.';o.lines.push(!schoolDay(D)?'No school today.':S.schoolIn?((pm>=t('10:30')&&pm<t('10:45'))?'Small break.':(pm>=t('12:30')&&pm<t('13:00'))?'Big break.':'In class.'):pm<t('08:50')?'Starts at ten to nine.':'Out since three.');o.lines.push(inside(S,['school']))}
+  else if(b.id==='garage'){o.role='Motors and cycles. It is the alternator.';o.lines.push(S.garageOpen?'Open.':'Closed.');o.lines.push(inside(S,['garage']));o.lines.push('One bicycle for sale. The Sergeant has been informed.')}
+  return o}
+function washLine(S){if(!S.wash.out)return'The line is empty.';const n=S.pd-S.wash.since;return'The washing is out'+(n<=0?' since this morning.':n===1?' since yesterday.':' '+NUM[n]+' days now.')+(S.wet?' It is getting a rinse.':'')}
+const NOTICES=['LOST: one glove, left. FOUND: one glove, left. The parties have been introduced.','Set dancing, Thursdays, in the hall. Beginners welcome, within reason.','Under-12 hurling: Tuesdays and Thursdays, half six. Bring a hurley and a coat.','The 10:15 bus now leaves at 10:15.','Whoever took the ladder from behind the school: it was holding something up.','The pothole (the big one): please do not feed it.','Turf for sale. Dry, more or less. Ask Jimmy Regan.','Missing: the 10 mm socket. Reward. D. Forde.','A lecture was to be given on the nature of time. It has been put back.','Found: a bicycle clip, warm.'];
+function spotCard(k,S){const D=S.D,pm=S.pm;
+  if(k==='moon')return{title:moonName(S.moon.age),lines:[Math.round(S.moon.illum*100)+'% lit. It is the real one, more or less where it really is.']};
+  if(k==='bike')return{title:"The Sergeant's bicycle",lines:[S.bike.self?'It is moving. There is nobody on it.':'Do not move it. It will see to that itself.']};
+  if(k==='cat')return{title:"The Savant's cat",lines:['Conceding nothing.']};
+  if(k==='hen')return{title:"One of Maureen Quinn's hens",lines:["Laying. Don't ask how many."]};
+  if(k==='study')return{title:'The top window',lines:[S.savantOn?'A light. It goes out when looked at, and comes back.':'Dark. He is in. He is always in.','He is said to hold '+THEORIES[(S.pd*4+tapN)%THEORIES.length]+'.']};
+  if(k==='notice'){const w=Math.floor(S.pd/7);return{title:'The noticeboard',lines:[NOTICES[hash('n',w)%NOTICES.length],NOTICES[(hash('n',w)+3)%NOTICES.length]]}}
+  if(k==='pump')return{title:'The pump',lines:['It works. Nobody has needed it since 1974. It is painted every year.']};
+  if(k==='postbox')return{title:'The post box',lines:['Collection at half five, or when Paddy remembers.']};
+  if(k==='wash')return{title:"Maureen Quinn's line",lines:[washLine(S)]};
+  if(k==='tree')return{title:'The sycamore',lines:['Older than the pub. Younger than the argument about it.']};
+  if(k==='bench')return{title:'The bench in the square',lines:['Donated in memory of a man who never sat down.']};
+  if(k==='busstop'){const nb=buses(S.pd).find(b=>b.arr>pm);return{title:'The bus stop',role:'Route 42. Six a day, two on Sundays.',lines:[nb?'Next: the '+clock(nb.sched)+' to '+cap(nb.dest.toLowerCase())+'.':'No more buses today.',nb?(nb.late>0?'The timetable says '+clock(nb.sched)+'. It will come at '+clock(nb.arr)+'. That is already settled.':'It will be on time. Nobody will be ready.'):'The first tomorrow is the 08:10, or thereabouts.']}}
+  if(k==='gort')return{title:'Gort, 6 km',lines:['Further on a wet day.']};
+  if(k==='kinvara')return{title:'Kinvara, 12 km',lines:['The sea is that way. So is the weather.']};
+  if(k==='pothole')return{title:'The pothole',lines:['It has a name now. The name is Declan.']};
+  if(k==='tower')return{title:'The round tower',lines:['It leans a little. It was like that when they found it.']};
+  if(k==='turlough')return{title:'The turlough',role:'A lake when it feels like it.',lines:[S.tl>0.6?'It is full. Swans on it.':S.tl>0.25?'It is middling.':S.tl>0.08?'There is not much of it left.':'It is gone. It drains through the floor in summer and nobody is alarmed.']};
+  if(k==='pitch'){const nm=nextMatch(S.pd),o={title:'The pitch',role:'Hurling. Maroon and white.',lines:[]};if(S.match)o.lines.push('Match on. The score is disputed.');else if(S.training)o.lines.push('Training. Declan Forde says they are coming on.');
+    if(nm!=null&&!S.match){const d=dinfo(nm);o.lines.push('Next home match: Sunday '+d.d+' '+MON[d.mo-1]+' at two, against '+matchResult(nm).opp+'.')}return o}
+  if(k==='fieldcows')return{title:"Regan's field",lines:[cowSeason(D)?'Six cows. They are looking at you without urgency.':'Empty. The cows are in for the winter.']};
+  if(k==='petrol')return{title:'The petrol pump',lines:['Still priced in gallons. Declan does the sum in his head and rounds it in your favour.']};
+  if(k==='orion')return{title:'Orion',lines:['Miss Cahill can point to it. So can you, now.']};
+  if(k==='bus'){const b=S._bus;return{title:'The '+clock(b.sched)+' to '+cap(b.dest.toLowerCase()),role:'Route 42.',lines:[b.late>0?(NUM[b.late]?cap(NUM[b.late]):b.late)+' minute'+(b.late===1?'':'s')+' late.':b.late===0?'On time. Suspicion is widespread.':'A minute early. An inquiry is under way.']}}
+  return null}
+const SPOTS=[['study',612,48,624,59],['notice',435,116,449,129],['pump',447,118,458,136],['postbox',324,122,332,136],['wash',156,108,192,128],['bench',460,126,479,136],['busstop',511,103,523,136],['tree',474,74,508,112],['gort',59,99,90,110],['kinvara',1052,99,1098,110],['pothole',875,145,886,151],['petrol',903,115,912,136],['pitch',916,84,1016,128],['fieldcows',1040,116,1100,132]];
+const DOORS=[['painting/',600,67,610,82]];
+function tap(sx,sy){
+  const wx_=sx+camX,S=cur;if(!S)return;$('hint').style.opacity='0';
+  for(const d of DOORS)if(wx_>=d[1]&&wx_<=d[3]&&sy>=d[2]&&sy<=d[4]){try{window.location.assign(d[0])}catch(e){}return}
+  for(let i=HITS.length-1;i>=0;i--){const h=HITS[i];if(wx_>=h.x0-2&&wx_<=h.x1+2&&sy>=h.y0-2&&sy<=h.y1+2){
+    if(h.type==='ent'){showCard(entCard(h.ref,S),{id:h.ref.v.id,x:(h.x0+h.x1)/2,y:h.y0});return}
+    if(h.type==='bus')S._bus=h.ref;
+    showCard(spotCard(h.type,S),{x:(h.x0+h.x1)/2,y:h.y0,small:1,h:h.y1-h.y0});return}}
+  if(hot.moon&&Math.abs(sx-hot.moon.x)<9&&Math.abs(sy-hot.moon.y)<9){showCard(spotCard('moon',S),{x:hot.moon.x,y:hot.moon.y-6,screen:1,small:1,h:13});return}
+  for(const s of SPOTS)if(wx_>=s[1]&&wx_<=s[3]&&sy>=s[2]&&sy<=s[4]){showCard(spotCard(s[0],S),{x:(s[1]+s[3])/2,y:s[2],small:1,h:s[4]-s[2]});return}
+  for(const b of BLD)if(wx_>=b.x&&wx_<=b.x+b.w&&sy>=b.top-8&&sy<=GY){showCard(bldCard(b,S),{x:b.x+b.w/2,y:b.top});return}
+  if(hot.tl&&Math.abs(sx-hot.tl.x)<34&&Math.abs(sy-hot.tl.y)<7&&wx_>416&&wx_<528){showCard(spotCard('turlough',S),{x:hot.tl.x,y:hot.tl.y-4,screen:1});return}
+  {const tx=midX(835);if(Math.abs(sx-tx)<6&&sy>midY(835)-24&&sy<midY(835)+2){showCard(spotCard('tower',S),{x:tx,y:midY(835)-22,screen:1});return}}
+  hideCard()}
+
+/* ---- dragging the street ---- */
+let drag=null;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,cam:camX,moved:false,t:performance.now(),lx:e.clientX,lt:performance.now()};vel=0;try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>6)drag.moved=true;if(drag.moved){cv.classList.add('drag');camX=clamp(Math.round(drag.cam-dx/cssScale),0,W-vw);const nt=performance.now();if(nt>drag.lt){vel=-(e.clientX-drag.lx)/cssScale/(nt-drag.lt)*16;drag.lx=e.clientX;drag.lt=nt}}});
+function endDrag(e){if(!drag)return;const d=drag;drag=null;cv.classList.remove('drag');if(!d.moved&&Math.abs(e.clientY-d.y)<10){vel=0;const r=cv.getBoundingClientRect();tap((e.clientX-r.left)/cssScale,(e.clientY-r.top)/cssScale)}else if(d.moved){$('hint').style.opacity='0';if(performance.now()-d.lt>80)vel=0}}
+cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',()=>{drag=null;cv.classList.remove('drag')});
+cv.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){camX=clamp(camX-24,0,W-vw);e.preventDefault()}else if(e.key==='ArrowRight'){camX=clamp(camX+24,0,W-vw);e.preventDefault()}else if(e.key==='Escape')hideCard()});
+card.addEventListener('click',()=>hideCard());
+let miniDrag=false;
+function miniTo(e){const r=mini.getBoundingClientRect();camX=clamp(Math.round((e.clientX-r.left)/r.width*W-vw/2),0,W-vw);vel=0}
+mini.addEventListener('pointerdown',e=>{miniDrag=true;try{mini.setPointerCapture(e.pointerId)}catch(_){}miniTo(e)});
+mini.addEventListener('pointermove',e=>{if(miniDrag)miniTo(e)});mini.addEventListener('pointerup',()=>{miniDrag=false});mini.addEventListener('pointercancel',()=>{miniDrag=false});
+function drawMini(S){const w=mini.width,h=mini.height,k=w/W,nt=S.night>0.5;nctx.fillStyle=nt?'#141b33':'#eef2ee';nctx.fillRect(0,0,w,h);
+  nctx.fillStyle=nt?'#2c385c':'#b9c6c0';for(const b of BLD){const bh=Math.round((GY-b.top)/92*(h-3));nctx.fillRect(Math.round(b.x*k),h-bh,Math.max(1,Math.round(b.w*k)),bh)}
+  nctx.fillStyle=nt?'#f2b65a':'#f2b65a';if(S.dark)for(const wn of WIN)if(S.lit[wn.room]&&wn.ground)nctx.fillRect(Math.round((wn.x+wn.w/2)*k)-1,h-4,2,3);
+  nctx.fillStyle=nt?'#e6ebf5':'#1c2a2d';for(const e of S.ents){if(e.hidden||e.far)continue;nctx.fillRect(Math.round(e.x*k)-1,h-3,2,2)}
+  for(const o of S.buses)nctx.fillRect(Math.round((o.x-30)*k),h-4,Math.round(60*k),3);
+  nctx.strokeStyle=nt?'#f2b65a':'#0b6b46';nctx.lineWidth=Math.max(1,Math.round(h/8));nctx.strokeRect(Math.round(camX*k)+1,1,Math.round(vw*k)-2,h-2)}
+
+/* ================= the log on the page ================= */
+const store={get(){try{return JSON.parse(localStorage.getItem('ballydeselby.v1')||'{}')}catch(e){return{}}},set(o){try{localStorage.setItem('ballydeselby.v1',JSON.stringify(o))}catch(e){}}};
+const VISIT=['You looked in. The Sergeant made a note of it.','You looked in. Bridie Lally said she knew you would.','Somebody was watching the parish. It was you.','You were seen at the edge of things, as usual.','You looked in. The cat looked back.','You looked in. Nothing was said, but it was noticed.'];
+let notes=[],lastSeen=null;
+function initVisit(){const o=store.get();notes=Array.isArray(o.notes)?o.notes.filter(n=>n&&typeof n.ms==='number'&&typeof n.text==='string'):[];const now=Date.now();
+  for(let i=notes.length-1;i>=0;i--)if(notes[i].v){lastSeen=notes[i].ms;break}
+  if(lastSeen==null||now-lastSeen>20*MIN){const n=notes.filter(x=>x.v).length;notes.push({ms:now,v:1,text:n===0?'A stranger was noted in the parish. The Sergeant has opened a file.':VISIT[hash('visit',n)%VISIT.length]});
+    notes=notes.slice(-40);store.set({notes})}else{/* same sitting: measure from the visit before this one, if there was one */const cur0=lastSeen;lastSeen=null;for(let i=notes.length-1;i>=0;i--)if(notes[i].v&&notes[i].ms<cur0-20*MIN){lastSeen=notes[i].ms;break}}}
+function addNote(text){notes.push({ms:Date.now(),text});notes=notes.slice(-40);store.set({notes});logKey=''}
+const cday=ms=>Math.floor((ms+tzOff(ms)*MIN)/DAY);
+function dayLabel(cd){const d=new Date(cd*DAY),rel=cd-cday(Date.now()),nm=DOW[d.getUTCDay()]+' '+d.getUTCDate()+' '+MON[d.getUTCMonth()];return rel===0?'Today, '+nm:rel===-1?'Yesterday, '+nm:rel===1?'Tomorrow, '+nm:nm}
+let logKey='',nowKey='';
+function drawLog(S){
+  const key=Math.floor(S.ms/MIN)+'|'+live+'|'+notes.length;if(key===logKey)return;logKey=key;
+  const real=Date.now(),first=lastSeen==null;let from;
+  if(live)from=first?S.ms-28*HOUR:Math.max(lastSeen-3*HOUR,S.ms-4*DAY);else from=S.ms-30*HOUR;
+  const rows=[];
+  for(let pd=S.pd;pd>=pday(from)&&rows.length<80;pd--){const t0=pdayStart(pd);
+    for(const e of dayEvents(pd)){const ms=t0+e.pm*MIN;if(ms<=S.ms&&ms>=from)rows.push({ms,pm:e.pm,text:e.text,kind:''})}}
+  for(const nt of notes)if(nt.ms<=S.ms&&nt.ms>=from)rows.push({ms:nt.ms,pm:pmin(nt.ms),text:nt.text,kind:'you'});
+  rows.sort((a,b)=>b.ms-a.ms);
+  const box=$('log');box.textContent='';let marked=!live||first,curDay=null,ol=null;
+  for(const r of rows){const cd=cday(r.ms);
+    if(cd!==curDay){curDay=cd;const h=document.createElement('h3');h.className='day';h.textContent=dayLabel(cd);box.appendChild(h);ol=document.createElement('ol');ol.className='ev';box.appendChild(ol)}
+    if(!marked&&r.ms<lastSeen){marked=true;const m=document.createElement('li');m.className='mark';m.textContent='You last looked in here';ol.appendChild(m)}
+    const li=document.createElement('li');if(r.kind)li.className=r.kind;const tm=document.createElement('time');tm.textContent=clock(r.pm);const sp=document.createElement('span');sp.textContent=r.text;li.appendChild(tm);li.appendChild(sp);ol.appendChild(li)}
+  if(!rows.length){const p=document.createElement('p');p.className='since';p.textContent='Nothing yet. Give it time.';box.appendChild(p)}
+  const sc=$('since');
+  if(!live)sc.textContent=S.ms>real?'This has not happened yet. It will.':'Looking back at '+DOW[cal(S.ms).dow]+', '+clock(S.pm)+'.';
+  else if(first)sc.textContent='First time here. This is the last day or so.';
+  else{const rel=cday(real)-cday(lastSeen),c=cal(lastSeen);sc.textContent='Since you last looked in, '+(rel===0?'earlier today':rel===1?'yesterday':DOW[c.dow]+' '+c.d+' '+MON[c.mo-1])+' at '+clock(pmin(lastSeen))+'.'+(real-lastSeen>4*DAY?' Only the last few days are shown. Before that, more of the same, give or take.':'')}}
+function wxWord(S){const w=S.wx;return w.rain>0.55?'lashing':w.rain>0.2?'raining':w.rain>0?'soft rain':w.mist>0.3?'mist':w.cloud>0.75?'overcast':w.cloud>0.4?'cloudy':S.night>0.5?'clear':'bright'}
+function nowLine(S){const a=[],by=S.by,pm=S.pm;
+  if(S.bike.self)a.push('Something is moving on the street. There is nobody on it.');
+  if(S.cowsMoving)a.push('Cows on the road.');
+  const inb=S.buses.find(o=>Math.abs(o.x-PL.busstop.x)<40);if(inb)a.push('The '+clock(inb.b.sched)+' bus is in.');
+  else{const due=buses(S.pd).find(b=>pm>=b.sched+2&&pm<b.arr-0.5);if(due)a.push('The '+clock(due.sched)+' bus is due. It is not here.')}
+  if(S.match)a.push('Match on at the pitch.');else if(S.training)a.push('Training at the pitch.');
+  if(S.session)a.push("Session in Lally's.");
+  const ph=pubHours(S.D);if(pm>=ph.close&&pm<ph.close+20&&S.inPub.length>2)a.push("Time has been called at Lally's. It is being considered.");
+  if(schoolDay(S.D)){if(pm>=t('10:30')&&pm<t('10:45'))a.push('Small break. The yard is loud.');else if(pm>=t('12:30')&&pm<t('13:00'))a.push('Big break. The yard is loud.')}
+  if(by.tom&&!by.tom.hidden)a.push(by.tom.moving&&by.tom.mode==='bike'?'The Sergeant is out on the bicycle.':'The Sergeant is '+by.tom.act+'.');
+  const outN=S.ents.filter(e=>!e.hidden&&!e.far&&!e.v.animal).length,lit=Object.keys(S.lit).length;
+  if(S.dark&&a.length<3)a.push(lit===0?'Every light is out.':lit===1&&S.lit['savant:study']?"Every light is out but the Savant's.":cap(NUM[lit]||String(lit))+' light'+(lit===1?'':'s')+' on.');
+  if(a.length<3)a.push(outN===0?(S.dark?'Nobody about.':'Nobody on the street.'):cap(NUM[outN]||String(outN))+(outN===1?' person':' people')+' out.');
+  if(a.length<3){const w=S.wx;a.push(w.rain>0.55?'Lashing.':w.rain>0?'A soft rain.':w.mist>0.3?'Mist.':w.temp<0.5?'Frost.':S.night>0.5&&w.cloud<0.35?'A clear night.':w.cloud>0.8?'Overcast.':S.night>0.5?'A dry night.':'A dry day, so far.')}
+  return a.slice(0,3).join(' ')}
+let themeN=-1,lastUi=0,lastMini=0;
+function theme(S){const nt=S.night>0.5?1:0;if(nt===themeN)return;themeN=nt;const st=document.documentElement.style,V=nt?['#0e1424','#dfe5f0','#98a5bd','#2a3350','#f2b65a','#141b33','dark']:['#dfe5e1','#1c2a2d','#56676a','#b9c6c0','#0b6b46','#eef2ee','light'];
+  ['--bg','--ink','--soft','--line','--accent','--panel'].forEach((k,i)=>st.setProperty(k,V[i]));st.setProperty('color-scheme',V[6])}
+function ui(S,tm){
+  if(tm-lastMini>240){lastMini=tm;drawMini(S)}
+  placeCard();
+  if(tm-lastUi<500)return;lastUi=tm;
+  theme(S);
+  {const c=cal(S.ms);$('sub').textContent=DOW[c.dow].slice(0,3)+' '+c.d+' '+MON[c.mo-1].slice(0,3)+' · '+Math.round(S.wx.temp)+'° '+wxWord(S)}
+  $('bClock').textContent=clock(S.pm);$('bClock').classList.toggle('peek',!live);$('bClock').setAttribute('aria-label',(live?'Parish time ':'Looking at ')+clock(S.pm)+'. Change the time');
+  const nl=nowLine(S);if(nl!==nowKey){nowKey=nl;$('now').textContent=nl}
+  drawLog(S);
+  if(!$('tp').hidden){{const c=cal(S.ms);$('tLabel').textContent=DOW[c.dow]+' '+c.d+' '+MON[c.mo-1].slice(0,3)+', '+clock(S.pm)};if(document.activeElement!==$('tRange'))$('tRange').value=Math.floor(S.pm)}
+  if(live&&S.bike.self&&S.bike.x>camX&&S.bike.x<camX+vw&&!sawBike){sawBike=true;addNote('You saw the bicycle go. The Sergeant would like a word.')}
+}
+let sawBike=false;
+
+/* ---- looking at other hours ---- */
+function peek(ms){live=false;simMs=ms;logKey='';lastUi=0;hideCard()}
+$('bClock').addEventListener('click',()=>{const p=$('tp');p.hidden=!p.hidden;$('bClock').setAttribute('aria-expanded',String(!p.hidden));lastUi=0});
+$('tRange').addEventListener('input',e=>{const S=cur||snapshot(simNow());rate=0;$('tRun').textContent='Run the day';peek(pdayStart(S.pd)+(+e.target.value)*MIN)});
+$('tPrev').addEventListener('click',()=>{peek(simNow()-DAY)});$('tNext').addEventListener('click',()=>{peek(simNow()+DAY)});
+$('tRun').addEventListener('click',()=>{if(live)peek(Date.now());rate=rate===0?90:rate===90?600:0;$('tRun').textContent=rate===0?'Run the day':rate===90?'Faster':'Pause'});
+$('tNow').addEventListener('click',()=>{live=true;rate=0;$('tRun').textContent='Run the day';logKey='';lastUi=0});
+/* ================= sound: the session heard through the wall, and rain ================= */
+const Snd={on:false,ctx:null,inside:false,next:0,pos:0,slot:0,ti:0,rounds:0};
+/* two traditional jigs, both long out of copyright: the Kesh, and the Connaughtman's Rambles */
+const TUNES=[{tonic:7,sharp:{F:1},parts:['G3 GAB|A3 ABd|edd gdd|edB dBA|G3 GAB|A3 ABd|edd gdB|AGF G3','BAB dBd|ege dBA|BAB dBG|ABA AGA|BAB dBd|ege dBd|gfg aga|bgf g3']},
+  {tonic:2,sharp:{F:1,C:1},parts:['FAA dAA|BAA dAG|FAA dfe|dBB BAG|FAA dAA|BAA def|gfe dfe|dBB B3','fbb faf|fed ede|fbb faf|fed e3|fbb faf|fed def|gfe dfe|dBB B3']}];
+function parseTune(tn){const base={C:60,D:62,E:64,F:65,G:67,A:69,B:71},seq=[];
+  for(const part of tn.parts){const notes=[];for(let i=0;i<part.length;i++){const ch=part[i],U=ch.toUpperCase();if(base[U]==null)continue;let d=1;const nx=part[i+1];if(nx>='2'&&nx<='9'){d=+nx;i++}notes.push([base[U]+(tn.sharp[U]?1:0)+(ch!==U?12:0),d])}
+    for(const n of notes)seq.push(n);for(const n of notes)seq.push(n)}
+  const pcs=[0,2,4,5,7,9,11].map(x=>(x+tn.tonic)%12);
+  return{seq,up:m=>pcs.indexOf((m+1)%12)>=0?m+1:m+2,down:m=>pcs.indexOf((m+11)%12)>=0?m-1:m-2}}
+const SEQS=TUNES.map(parseTune);
+function soundOn(v){
+  Snd.on=v;const b=$('bSound');b.setAttribute('aria-pressed',String(v));b.textContent=v?'Sound on':'Sound off';
+  if(v&&!Snd.ctx){try{const AC=window.AudioContext||window.webkitAudioContext,c=new AC();
+    Snd.master=c.createGain();Snd.master.gain.value=0.8;Snd.master.connect(c.destination);
+    Snd.lp=c.createBiquadFilter();Snd.lp.type='lowpass';Snd.lp.frequency.value=640;Snd.lp.Q.value=0.6;Snd.lp.connect(Snd.master);
+    Snd.sg=c.createGain();Snd.sg.gain.value=0;Snd.sg.connect(Snd.lp);
+    const len=c.sampleRate*2,buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;Snd.noise=buf;
+    const src=c.createBufferSource();src.buffer=buf;src.loop=true;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1500;bp.Q.value=0.4;
+    Snd.rg=c.createGain();Snd.rg.gain.value=0;src.connect(bp);bp.connect(Snd.rg);Snd.rg.connect(Snd.master);src.start();Snd.ctx=c}catch(e){Snd.ctx=null}}
+  if(Snd.ctx&&v){try{Snd.ctx.resume()}catch(e){}}
+  if(!v)Snd.inside=false}
+function fid(m,t0,dur,vol,type){if(dur<=0.01)return;const c=Snd.ctx,f=440*Math.pow(2,(m-69)/12),o=c.createOscillator(),gn=c.createGain();o.type=type||'sawtooth';
+  o.frequency.setValueAtTime(f*0.988,t0);o.frequency.linearRampToValueAtTime(f,t0+0.03);
+  const a=Math.min(0.02,dur*0.3),rl=Math.min(0.04,dur*0.3);
+  gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(vol,t0+a);gn.gain.setValueAtTime(vol,t0+dur-rl);gn.gain.linearRampToValueAtTime(0,t0+dur);
+  o.connect(gn);gn.connect(Snd.sg);o.start(t0);o.stop(t0+dur+0.02)}
+function thump(t0,vol){const c=Snd.ctx,s=c.createBufferSource(),f=c.createBiquadFilter(),gn=c.createGain();s.buffer=Snd.noise;f.type='lowpass';f.frequency.value=170;
+  gn.gain.setValueAtTime(vol,t0);gn.gain.exponentialRampToValueAtTime(0.001,t0+0.12);s.connect(f);f.connect(gn);gn.connect(Snd.sg);s.start(t0,Math.random());s.stop(t0+0.14)}
+const E8=0.178,LILT=[1.14,0.84,1.02];
+function sndTick(S){const c=Snd.ctx;if(!c)return;const want=Snd.on&&live&&S.session,now=c.currentTime;
+  const d=Math.abs(camX+vw/2-376);
+  Snd.sg.gain.setTargetAtTime(want?clamp(1-d/560,0.06,1)*(Snd.inside?0.85:0.6):0,now,0.35);
+  Snd.lp.frequency.setTargetAtTime(Snd.inside?4300:640,now,0.25);
+  Snd.rg.gain.setTargetAtTime(Snd.on&&S.wx.rain>0?0.012+S.wx.rain*0.06:0,now,0.8);
+  if(!want){Snd.next=0;return}
+  if(Snd.next<now)Snd.next=now+0.12;
+  let guard=0;
+  while(Snd.next<now+0.7&&guard++<24){const T=SEQS[Snd.ti],nt=T.seq[Snd.pos],m=nt[0],n=nt[1],t0=Snd.next;let dur=0;
+    for(let k=0;k<n;k++)dur+=E8*LILT[(Snd.slot+k)%3];
+    if(Snd.slot%6===0)thump(t0,0.9);else if(Snd.slot%6===3)thump(t0,0.5);
+    if(n>=3){const a=E8*LILT[0],b=E8*LILT[1],cut=0.05;
+      fid(m,t0,a,0.11);fid(T.up(m),t0+a,cut,0.07);fid(m,t0+a+cut,b-cut,0.1);fid(T.down(m),t0+a+b,cut,0.06);fid(m,t0+a+b+cut,dur-a-b-cut,0.11)}
+    else fid(m,t0,dur*0.97,Snd.slot%3===0?0.12:0.095);
+    fid(m,t0+0.012,dur*0.95,0.05,'triangle');
+    Snd.next+=dur;Snd.slot=(Snd.slot+n)%6;Snd.pos++;
+    if(Snd.pos>=T.seq.length){Snd.pos=0;Snd.rounds++;if(Snd.rounds%2===0)Snd.ti=(Snd.ti+1)%SEQS.length}}}
+$('bSound').addEventListener('click',()=>soundOn(!Snd.on));
+
+/* ================= go ================= */
+let lastT=performance.now(),acc=0,camF=0;
+function focusX(S){const xs=S.ents.filter(e=>!e.hidden&&!e.far&&!e.v.animal).map(e=>e.x).sort((a,b)=>a-b);
+  if(S.cowsMoving){const c=S.ents.find(e=>e.v.sprite==='cow'&&e.moving);if(c)return c.x}
+  if(xs.length)return xs[xs.length>>1];return S.session||S.pubOpen?400:430}
+function frame(tm){requestAnimationFrame(frame);const dt=Math.min(250,tm-lastT);lastT=tm;if(!live)simMs+=dt*rate;
+  acc+=dt;if(acc<(reduced?90:30))return;
+  if(drag||miniDrag){camF=camX}else if(Math.abs(vel)>0.04){camF=clamp(camF+vel*acc/16,0,W-vw);camX=Math.round(camF);vel*=Math.pow(0.9,acc/16)}else{vel=0;camF=camX}
+  acc=0;
+  try{const S=snapshot(simNow());cur=S;render(S);ui(S,tm);sndTick(S)}catch(e){if(!frame.err){frame.err=1;console.error(e);const n=$('now');if(n)n.textContent='The parish has stopped. Something went wrong drawing it: '+e.message}}}
+function start(){initVisit();fit();{const S0=snapshot(simNow());theme(S0);camX=clamp(Math.round(focusX(S0)-vw/2),0,W-vw);camF=camX}
+  setTimeout(()=>document.body.classList.add('on'),400);
+  window.addEventListener('resize',fit);requestAnimationFrame(frame);setTimeout(()=>{$('hint').style.opacity='0'},10000)}
+start();
 </script>
 </body>
 </html>
